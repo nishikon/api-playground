@@ -208,8 +208,8 @@ firestoreForm.addEventListener("submit", async (event) => {
             firestoreMessage.textContent = "保存に成功しました！";
             firestoreForm.reset();
 
-            // Firestoreから最新の投稿一覧を取得
-            await getFirestorePosts();
+            watchFirestorePosts();
+
         } else {
             firestoreMessage.textContent = "保存に失敗しました";
         }
