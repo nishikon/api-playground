@@ -19,7 +19,105 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 function renderFirestorePosts(snapshot) {
+    const container = document.getElementById("firestore-post");
+    container.replaceChildren();
 
+    snapshot.forEach((doc) => {
+        const post = doc.data();
+
+        const card = document.createElement("div");
+        card.className = "post-card";
+
+        const titleElement = document.createElement("h3");
+        titleElement.textContent = post.title;
+
+        const bodyElement = document.createElement("p");
+        bodyElement.textContent = post.body;
+
+        card.appendChild(titleElement);
+        card.appendChild(bodyElement);
+
+        const user = auth.currentUser;
+
+        // 自分の投稿だけ削除ボタンを表示
+        if (user && post.userId === user.uid) {
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "削除";
+
+            deleteButton.addEventListener("click", async () => {
+                const confirmed = confirm("この投稿を削除しますか？");
+
+                if (!confirmed) {
+                    return;
+                }
+
+                deleteButton.disabled = true;
+
+                const success = await deleteFirestorePost(doc.id);
+
+                if (success) {
+                    card.remove();
+                } else {
+                    alert("削除に失敗しました");
+                    deleteButton.disabled = false;
+                }
+            });
+
+            card.appendChild(deleteButton);
+
+            const editButton = document.createElement("button");
+            editButton.textContent = "編集";
+
+            editButton.addEventListener("click", async () => {
+                // 現在のタイトルと本文を初期値として表示
+                const newTitle = prompt("新しいタイトル", post.title);
+
+                if (newTitle === null) {
+                    return;
+                }
+
+                const newBody = prompt("新しい本文", post.body);
+
+                if (newBody === null) {
+                    return;
+                }
+
+                const title = newTitle.trim();
+                const body = newBody.trim();
+
+                if (!title || !body) {
+                    alert("タイトルと本文を入力してください");
+                    return;
+                }
+
+                if (title.length > 100 || body.length > 2000) {
+                    alert("タイトルは100文字以内、本文は2000文字以内にしてください");
+                    return;
+                }
+
+                editButton.disabled = true;
+
+                const success = await updateFirestorePost(doc.id, title, body);
+
+                if (success) {
+                    titleElement.textContent = title;
+                    bodyElement.textContent = body;
+
+                    // 次に編集するときのために値を更新
+                    post.title = title;
+                    post.body = body;
+                } else {
+                    alert("更新に失敗しました");
+                }
+
+                editButton.disabled = false;
+            });
+
+            card.appendChild(editButton);
+        }
+
+        container.appendChild(card);
+    });
 }
 
 async function getFirestorePosts() {
@@ -27,105 +125,8 @@ async function getFirestorePosts() {
         const postsRef = collection(db, "posts");
         const snapshot = await getDocs(postsRef);
 
-        const container = document.getElementById("firestore-post");
-        container.replaceChildren();
+        renderFirestorePosts(snapshot);
 
-        snapshot.forEach((doc) => {
-            const post = doc.data();
-
-            const card = document.createElement("div");
-            card.className = "post-card";
-
-            const titleElement = document.createElement("h3");
-            titleElement.textContent = post.title;
-
-            const bodyElement = document.createElement("p");
-            bodyElement.textContent = post.body;
-
-            card.appendChild(titleElement);
-            card.appendChild(bodyElement);
-
-            const user = auth.currentUser;
-
-            // 自分の投稿だけ削除ボタンを表示
-            if (user && post.userId === user.uid) {
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "削除";
-
-                deleteButton.addEventListener("click", async () => {
-                    const confirmed = confirm("この投稿を削除しますか？");
-
-                    if (!confirmed) {
-                        return;
-                    }
-
-                    deleteButton.disabled = true;
-
-                    const success = await deleteFirestorePost(doc.id);
-
-                    if (success) {
-                        card.remove();
-                    } else {
-                        alert("削除に失敗しました");
-                        deleteButton.disabled = false;
-                    }
-                });
-
-                card.appendChild(deleteButton);
-
-                const editButton = document.createElement("button");
-                editButton.textContent = "編集";
-
-                editButton.addEventListener("click", async () => {
-                    // 現在のタイトルと本文を初期値として表示
-                    const newTitle = prompt("新しいタイトル", post.title);
-
-                    if (newTitle === null) {
-                        return;
-                    }
-
-                    const newBody = prompt("新しい本文", post.body);
-
-                    if (newBody === null) {
-                        return;
-                    }
-
-                    const title = newTitle.trim();
-                    const body = newBody.trim();
-
-                    if (!title || !body) {
-                        alert("タイトルと本文を入力してください");
-                        return;
-                    }
-
-                    if (title.length > 100 || body.length > 2000) {
-                        alert("タイトルは100文字以内、本文は2000文字以内にしてください");
-                        return;
-                    }
-
-                    editButton.disabled = true;
-
-                    const success = await updateFirestorePost(doc.id, title, body);
-
-                    if (success) {
-                        titleElement.textContent = title;
-                        bodyElement.textContent = body;
-
-                        // 次に編集するときのために値を更新
-                        post.title = title;
-                        post.body = body;
-                    } else {
-                        alert("更新に失敗しました");
-                    }
-
-                    editButton.disabled = false;
-                });
-
-                card.appendChild(editButton);
-            }
-
-            container.appendChild(card);
-        });
     } catch (error) {
         console.error("Firestore取得エラー:", error);
     }
