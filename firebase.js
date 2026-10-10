@@ -167,8 +167,7 @@ async function loginAnonymously() {
         console.log("匿名ログイン成功");
         console.log("ユーザーID:", result.user.uid);
 
-        // ログイン完了後に投稿一覧を取得する
-        await getFirestorePosts();
+        watchFirestorePosts();
 
 
 
