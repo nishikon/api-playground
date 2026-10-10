@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getDocs, getFirestore, addDoc, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getDocs, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -127,7 +127,7 @@ async function getFirestorePosts() {
     }
 }
 
-getFirestorePosts();
+
 
 console.log("Firebaseの初期化に成功しました");
 
@@ -251,3 +251,13 @@ async function updateFirestorePost(postId, newTitle, newBody) {
         return false;
     }
 }
+
+function watchFirestorePosts() {
+    onSnapshot(collection(db, "posts"), (snapshot) => {
+      console.log("Firestoreのデータを取得しました");
+  
+      snapshot.forEach((doc) => {
+        console.log(doc.id, doc.data());
+      });
+    });
+  }
