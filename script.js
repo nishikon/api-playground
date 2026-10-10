@@ -1,6 +1,6 @@
 async function getPost() {
     const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts/1"
+        "https://jsonplaceholder.typicode.com/posts"
     );
 
     const data = await response.json();
@@ -9,6 +9,9 @@ async function getPost() {
 
     postsElement.textContent = data.title;
 
+    console.log(data);
+    console.log(data.length);
+
 }
 
-getPost();
+getPosts();
