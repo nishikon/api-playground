@@ -54,29 +54,42 @@ console.log("Firebaseの初期化に成功しました");
 
 async function saveFirestorePost(title, body) {
     try {
-        const postsRef = collection(db, "posts");
-
-        const newPost = {
-            title: title,
-            body: body,
-            userId: 1
-        };
-
-        const docRef = await addDoc(postsRef, newPost);
-
-        console.log("保存成功:", docRef.id);
+      const user = auth.currentUser;
+  
+      if (!user) {
+        console.log("ログインが必要です");
+        return;
+      }
+  
+      const postsRef = collection(db, "posts");
+  
+      const newPost = {
+        title: title,
+        body: body,
+        userId: user.uid
+      };
+  
+      const docRef = await addDoc(postsRef, newPost);
+  
+      console.log("保存成功:", docRef.id);
     } catch (error) {
-        console.error("保存エラー:", error);
+      console.error("保存エラー:", error);
     }
-}
+  }
 
 
-async function loginAnonymously() {
+  async function loginAnonymously() {
     try {
       const result = await signInAnonymously(auth);
   
       console.log("匿名ログイン成功");
       console.log("ユーザーID:", result.user.uid);
+  
+      await saveFirestorePost(
+        "初めてのアプリ投稿",
+        "匿名認証を使ってFirestoreに保存しました"
+      );
+  
     } catch (error) {
       console.error("匿名ログインエラー:", error);
     }
