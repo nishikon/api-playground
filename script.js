@@ -37,15 +37,15 @@ async function getPosts() {
 
             deleteButton.addEventListener("click", async () => {
                 deleteButton.disabled = true;
-              
+
                 const success = await deletePost(post.id);
-              
+
                 if (success) {
-                  cardElement.remove();
+                    cardElement.remove();
                 } else {
-                  deleteButton.disabled = false;
+                    deleteButton.disabled = false;
                 }
-              });
+            });
 
             // タイトルと本文をカードの中に入れる
             cardElement.appendChild(titleElement);
@@ -227,50 +227,71 @@ async function deletePost(postId) {
 const postForm = document.getElementById("post-form");
 
 postForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const title = document.getElementById("post-title").value;
-  const body = document.getElementById("post-body").value;
-  const success = await submitPost(title, body);
+    const title = document.getElementById("post-title").value;
+    const body = document.getElementById("post-body").value;
 
-  if (success) {
-    alert("投稿に成功しました！");
-    postForm.reset();
-  } else {
-    alert("投稿に失敗しました。");
-  }
+    const newPost = await submitPost(title, body);
+
+    if (newPost) {
+
+        addPostCard(newPost);
+        alert("投稿に成功しました！");
+        postForm.reset();
+    } else {
+        alert("投稿に失敗しました。");
+    }
 });
 
 
 async function submitPost(title, body) {
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            title: title,
-            body: body,
-            userId: 1
-          })
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    title: title,
+                    body: body,
+                    userId: 1
+                })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
         }
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
-  
-      const data = await response.json();
-  
-      console.log("POST成功:", data);
-  
-      return true;
-  
+
+        const data = await response.json();
+
+        console.log("POST成功:", data);
+
+        return data;
+
     } catch (error) {
-      console.error("POSTエラー:", error);
-      return false;
+        console.error("POSTエラー:", error);
+        return null;
     }
-  }
+}
+
+function addPostCard(post) {
+    const postsElement = document.getElementById("posts");
+
+    const cardElement = document.createElement("div");
+    cardElement.className = "post-card";
+
+    const titleElement = document.createElement("h2");
+    titleElement.textContent = post.title;
+
+    const bodyElement = document.createElement("p");
+    bodyElement.textContent = post.body;
+
+    cardElement.appendChild(titleElement);
+    cardElement.appendChild(bodyElement);
+
+    postsElement.prepend(cardElement);
+}
