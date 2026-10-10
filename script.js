@@ -8,7 +8,7 @@ async function getPosts() {
 
         if (!response.ok) {
             throw new Error(`HTTPエラー: ${response.status}`);
-          }
+        }
 
 
         const data = await response.json();
@@ -29,3 +29,38 @@ async function getPosts() {
 }
 
 getPosts();
+
+
+const newPost = {
+    title: "APIの勉強",
+    body: "POSTリクエストの練習をしています",
+    userId: 1
+  };
+
+  async function createPost() {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(newPost)
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      console.log(data);
+  
+    } catch (error) {
+      console.error("POSTエラー:", error);
+    }
+  }
+  
+  createPost();
