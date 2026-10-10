@@ -64,3 +64,39 @@ const newPost = {
   }
   
   createPost();
+
+
+  const updatedPost = {
+    id: 1,
+    title: "APIの勉強（更新版）",
+    body: "PUTリクエストを勉強しています",
+    userId: 1
+  };
+  
+  async function updatePost() {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts/1",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(updatedPost)
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      console.log("PUTの結果:", data);
+  
+    } catch (error) {
+      console.error("PUTエラー:", error);
+    }
+  }
+  
+  updatePost();
