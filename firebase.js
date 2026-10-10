@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getDocs, getFirestore } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getDocs, getFirestore, addDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 
 
 
@@ -50,3 +50,21 @@ async function getFirestorePosts() {
   getFirestorePosts();
 
 console.log("Firebaseの初期化に成功しました");
+
+async function saveFirestorePost(title, body) {
+    try {
+      const postsRef = collection(db, "posts");
+  
+      const newPost = {
+        title: title,
+        body: body,
+        userId: 1
+      };
+  
+      const docRef = await addDoc(postsRef, newPost);
+  
+      console.log("保存成功:", docRef.id);
+    } catch (error) {
+      console.error("保存エラー:", error);
+    }
+  }
