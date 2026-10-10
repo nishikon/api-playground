@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
 import { collection, getDocs, getFirestore, addDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
-
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
 // Firebase Consoleに表示された設定情報
@@ -16,55 +16,70 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 async function getFirestorePosts() {
     try {
-      const postsRef = collection(db, "posts");
-      const snapshot = await getDocs(postsRef);
-  
-      const container = document.getElementById("firestore-post");
-      container.replaceChildren();
-  
-      snapshot.forEach((doc) => {
-        const post = doc.data();
-  
-        const card = document.createElement("div");
-        card.className = "post-card";
-  
-        const titleElement = document.createElement("h3");
-        titleElement.textContent = post.title;
-  
-        const bodyElement = document.createElement("p");
-        bodyElement.textContent = post.body;
-  
-        card.appendChild(titleElement);
-        card.appendChild(bodyElement);
-  
-        container.appendChild(card);
-      });
+        const postsRef = collection(db, "posts");
+        const snapshot = await getDocs(postsRef);
+
+        const container = document.getElementById("firestore-post");
+        container.replaceChildren();
+
+        snapshot.forEach((doc) => {
+            const post = doc.data();
+
+            const card = document.createElement("div");
+            card.className = "post-card";
+
+            const titleElement = document.createElement("h3");
+            titleElement.textContent = post.title;
+
+            const bodyElement = document.createElement("p");
+            bodyElement.textContent = post.body;
+
+            card.appendChild(titleElement);
+            card.appendChild(bodyElement);
+
+            container.appendChild(card);
+        });
     } catch (error) {
-      console.error("Firestore取得エラー:", error);
+        console.error("Firestore取得エラー:", error);
     }
-  }
-  
-  getFirestorePosts();
+}
+
+getFirestorePosts();
 
 console.log("Firebaseの初期化に成功しました");
 
 async function saveFirestorePost(title, body) {
     try {
-      const postsRef = collection(db, "posts");
-  
-      const newPost = {
-        title: title,
-        body: body,
-        userId: 1
-      };
-  
-      const docRef = await addDoc(postsRef, newPost);
-  
-      console.log("保存成功:", docRef.id);
+        const postsRef = collection(db, "posts");
+
+        const newPost = {
+            title: title,
+            body: body,
+            userId: 1
+        };
+
+        const docRef = await addDoc(postsRef, newPost);
+
+        console.log("保存成功:", docRef.id);
     } catch (error) {
-      console.error("保存エラー:", error);
+        console.error("保存エラー:", error);
+    }
+}
+
+
+async function loginAnonymously() {
+    try {
+      const result = await signInAnonymously(auth);
+  
+      console.log("匿名ログイン成功");
+      console.log("ユーザーID:", result.user.uid);
+    } catch (error) {
+      console.error("匿名ログインエラー:", error);
     }
   }
+  
+  loginAnonymously();
