@@ -18,6 +18,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+function renderFirestorePosts(snapshot) {
+
+}
+
 async function getFirestorePosts() {
     try {
         const postsRef = collection(db, "posts");
@@ -207,7 +211,7 @@ firestoreForm.addEventListener("submit", async (event) => {
         if (success) {
             firestoreMessage.textContent = "保存に成功しました！";
             firestoreForm.reset();
-            
+
         } else {
             firestoreMessage.textContent = "保存に失敗しました";
         }
