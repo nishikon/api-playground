@@ -23,7 +23,17 @@ async function getFirestorePost() {
         const snapshot = await getDoc(postRef);
 
         if (snapshot.exists()) {
-            console.log(snapshot.id, snapshot.data());
+            const post = snapshot.data();
+
+            const container = document.getElementById("firestore-post");
+
+            const titleElement = document.createElement("h3");
+            titleElement.textContent = post.title;
+
+            const bodyElement = document.createElement("p");
+            bodyElement.textContent = post.body;
+
+            container.replaceChildren(titleElement, bodyElement);
         } else {
             console.log("投稿が見つかりません");
         }
