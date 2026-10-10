@@ -16,7 +16,21 @@
         </h2>
         <div id="posts"></div>
         <button id="load-posts">投稿を取得する</button>
-        <h2>新しい投稿</h2>
+       
+
+        <h2>Firestoreに投稿する</h2>
+
+        <form id="firestore-form">
+            <input type="text" id="firestore-title" placeholder="タイトル" maxlength="100" required />
+
+            <textarea id="firestore-body" placeholder="本文" maxlength="2000" required></textarea>
+
+            <button type="submit" id="firestore-submit">
+                Firestoreに保存
+            </button>
+        </form>
+
+        <p id="firestore-message" role="status"></p>
 
         <form id="post-form">
             <input type="text" id="post-title" placeholder="投稿タイトル" required />

@@ -54,45 +54,85 @@ console.log("Firebaseの初期化に成功しました");
 
 async function saveFirestorePost(title, body) {
     try {
-      const user = auth.currentUser;
-  
-      if (!user) {
-        console.log("ログインが必要です");
-        return;
-      }
-  
-      const postsRef = collection(db, "posts");
-  
-      const newPost = {
-        title: title,
-        body: body,
-        userId: user.uid
-      };
-  
-      const docRef = await addDoc(postsRef, newPost);
-  
-      console.log("保存成功:", docRef.id);
+        const user = auth.currentUser;
+
+        if (!user) {
+            console.error("ログインが必要です");
+            return false;
+        }
+
+        const postsRef = collection(db, "posts");
+
+        const newPost = {
+            title: title,
+            body: body,
+            userId: user.uid
+        };
+
+        const docRef = await addDoc(postsRef, newPost);
+
+        console.log("保存成功:", docRef.id);
+        return true;
+
     } catch (error) {
-      console.error("保存エラー:", error);
+        console.error("保存エラー:", error);
+        return false;
     }
-  }
+}
 
 
-  async function loginAnonymously() {
+async function loginAnonymously() {
     try {
-      const result = await signInAnonymously(auth);
-  
-      console.log("匿名ログイン成功");
-      console.log("ユーザーID:", result.user.uid);
-  
-      await saveFirestorePost(
-        "初めてのアプリ投稿",
-        "匿名認証を使ってFirestoreに保存しました"
-      );
-  
+        const result = await signInAnonymously(auth);
+
+        console.log("匿名ログイン成功");
+        console.log("ユーザーID:", result.user.uid);
+
+      
+
     } catch (error) {
-      console.error("匿名ログインエラー:", error);
+        console.error("匿名ログインエラー:", error);
     }
+}
+
+loginAnonymously();
+
+const firestoreForm = document.getElementById("firestore-form");
+const firestoreTitle = document.getElementById("firestore-title");
+const firestoreBody = document.getElementById("firestore-body");
+const firestoreSubmit = document.getElementById("firestore-submit");
+const firestoreMessage = document.getElementById("firestore-message");
+
+firestoreForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const title = firestoreTitle.value.trim();
+  const body = firestoreBody.value.trim();
+
+  if (!title || !body) {
+    firestoreMessage.textContent = "タイトルと本文を入力してください";
+    return;
   }
-  
-  loginAnonymously();
+
+  firestoreSubmit.disabled = true;
+  firestoreMessage.textContent = "保存中です...";
+
+  try {
+    // ログイン処理が完了するまで待つ
+    await auth.authStateReady();
+
+    const success = await saveFirestorePost(title, body);
+
+    if (success) {
+      firestoreMessage.textContent = "保存に成功しました！";
+      firestoreForm.reset();
+
+      // Firestoreから最新の投稿一覧を取得
+      await getFirestorePosts();
+    } else {
+      firestoreMessage.textContent = "保存に失敗しました";
+    }
+  } finally {
+    firestoreSubmit.disabled = false;
+  }
+});
