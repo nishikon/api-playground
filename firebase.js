@@ -120,17 +120,7 @@ function renderFirestorePosts(snapshot) {
     });
 }
 
-async function getFirestorePosts() {
-    try {
-        const postsRef = collection(db, "posts");
-        const snapshot = await getDocs(postsRef);
 
-        renderFirestorePosts(snapshot);
-
-    } catch (error) {
-        console.error("Firestore取得エラー:", error);
-    }
-}
 
 
 
