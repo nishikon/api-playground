@@ -156,3 +156,10 @@ const newPost = {
   }
   
   deletePost();
+
+
+  const loadButton = document.getElementById("load-posts");
+
+loadButton.addEventListener("click", () => {
+  console.log("ボタンがクリックされました！");
+});
