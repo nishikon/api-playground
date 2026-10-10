@@ -100,3 +100,36 @@ const newPost = {
   }
   
   updatePost();
+
+
+  const patchedPost = {
+    title: "PATCHでタイトルを変更しました"
+  };
+  
+  async function patchPost() {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts/1",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(patchedPost)
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      console.log("PATCHの結果:", data);
+  
+    } catch (error) {
+      console.error("PATCHエラー:", error);
+    }
+  }
+  
+  patchPost();
