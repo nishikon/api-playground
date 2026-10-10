@@ -258,8 +258,6 @@ function watchFirestorePosts() {
     onSnapshot(collection(db, "posts"), (snapshot) => {
         console.log("Firestoreのデータを取得しました");
 
-        snapshot.forEach((doc) => {
-            console.log(doc.id, doc.data());
-        });
+        renderFirestorePosts(snapshot);
     });
 }
