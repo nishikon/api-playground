@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getDocs, getFirestore, addDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getDocs, getFirestore, addDoc, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -180,6 +180,24 @@ async function deleteFirestorePost(postId) {
   
     } catch (error) {
       console.error("Firestore削除エラー:", error);
+      return false;
+    }
+  }
+
+  async function updateFirestorePost(postId, newTitle, newBody) {
+    try {
+      const postRef = doc(db, "posts", postId);
+  
+      await updateDoc(postRef, {
+        title: newTitle,
+        body: newBody
+      });
+  
+      console.log("Firestoreの投稿を更新しました:", postId);
+      return true;
+  
+    } catch (error) {
+      console.error("Firestore更新エラー:", error);
       return false;
     }
   }
