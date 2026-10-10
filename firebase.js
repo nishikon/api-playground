@@ -29,7 +29,7 @@ function renderFirestorePosts(snapshot) {
         return timeB - timeA;
     });
 
-    snapshot.forEach((doc) => {
+    sortedDocs.forEach((doc) => {
         const post = doc.data();
 
         const card = document.createElement("div");
