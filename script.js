@@ -35,9 +35,17 @@ async function getPosts() {
             const deleteButton = document.createElement("button");
             deleteButton.textContent = "削除";
 
-            deleteButton.addEventListener("click", () => {
-                deletePost(post.id);
-            });
+            deleteButton.addEventListener("click", async () => {
+                deleteButton.disabled = true;
+              
+                const success = await deletePost(post.id);
+              
+                if (success) {
+                  cardElement.remove();
+                } else {
+                  deleteButton.disabled = false;
+                }
+              });
 
             // タイトルと本文をカードの中に入れる
             cardElement.appendChild(titleElement);
@@ -207,7 +215,10 @@ async function deletePost(postId) {
 
         console.log(`投稿ID ${postId} の削除に成功しました`);
 
+        return true;
+
     } catch (error) {
         console.error("DELETEエラー:", error);
+        return false;
     }
 }
