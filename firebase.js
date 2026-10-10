@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -21,6 +21,13 @@ const auth = getAuth(app);
 function renderFirestorePosts(snapshot) {
     const container = document.getElementById("firestore-post");
     container.replaceChildren();
+
+    const sortedDocs = snapshot.docs.sort((a, b) => {
+        const timeA = a.data().createdAt?.toMillis() ?? 0;
+        const timeB = b.data().createdAt?.toMillis() ?? 0;
+
+        return timeB - timeA;
+    });
 
     snapshot.forEach((doc) => {
         const post = doc.data();
