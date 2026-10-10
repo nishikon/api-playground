@@ -20,40 +20,10 @@ async function getPosts() {
         postsElement.replaceChildren();
 
         data.slice(0, 5).forEach((post) => {
-            // カード全体を作成
-            const cardElement = document.createElement("div");
-            cardElement.className = "post-card";
-
-            // タイトルを作成
-            const titleElement = document.createElement("h2");
-            titleElement.textContent = post.title;
-
-            // 本文を作成
-            const bodyElement = document.createElement("p");
-            bodyElement.textContent = post.body;
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "削除";
-
-            deleteButton.addEventListener("click", async () => {
-                deleteButton.disabled = true;
-
-                const success = await deletePost(post.id);
-
-                if (success) {
-                    cardElement.remove();
-                } else {
-                    deleteButton.disabled = false;
-                }
-            });
-
-            // タイトルと本文をカードの中に入れる
-            cardElement.appendChild(titleElement);
-            cardElement.appendChild(bodyElement);
-            cardElement.appendChild(deleteButton);
-            // カードを投稿一覧に追加
-            postsElement.appendChild(cardElement);
-        });
+            const card = createPostCard(post);
+          
+            postsElement.appendChild(card);
+          });
 
     } catch (error) {
         console.error("API通信でエラーが発生しました：", error);
@@ -280,18 +250,40 @@ async function submitPost(title, body) {
 
 function addPostCard(post) {
     const postsElement = document.getElementById("posts");
+  
+    const card = createPostCard(post);
+  
+    postsElement.prepend(card);
+  }
 
+function createPostCard(post) {
     const cardElement = document.createElement("div");
     cardElement.className = "post-card";
-
+  
     const titleElement = document.createElement("h2");
     titleElement.textContent = post.title;
-
+  
     const bodyElement = document.createElement("p");
     bodyElement.textContent = post.body;
-
+  
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "削除";
+  
+    deleteButton.addEventListener("click", async () => {
+      deleteButton.disabled = true;
+  
+      const success = await deletePost(post.id);
+  
+      if (success) {
+        cardElement.remove();
+      } else {
+        deleteButton.disabled = false;
+      }
+    });
+  
     cardElement.appendChild(titleElement);
     cardElement.appendChild(bodyElement);
-
-    postsElement.prepend(cardElement);
-}
+    cardElement.appendChild(deleteButton);
+  
+    return cardElement;
+  }
