@@ -222,3 +222,16 @@ async function deletePost(postId) {
         return false;
     }
 }
+
+
+const postForm = document.getElementById("post-form");
+
+postForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const title = document.getElementById("post-title").value;
+  const body = document.getElementById("post-body").value;
+
+  console.log("タイトル:", title);
+  console.log("本文:", body);
+});
