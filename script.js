@@ -1,22 +1,25 @@
 async function getPosts() {
-    const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts"
-    );
-
-    const data = await response.json();
-
-    console.log(data);
-
     const postsElement = document.getElementById("posts");
 
-    data.slice(0, 5).forEach((post) => {
-        const titleElement = document.createElement("h2");
-    
-        titleElement.textContent = post.title;
-    
-        postsElement.appendChild(titleElement);
-      });
+    try {
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts"
+        );
+        const data = await response.json();
 
+
+        data.slice(0, 5).forEach((post) => {
+            const titleElement = document.createElement("h2");
+
+            titleElement.textContent = post.title;
+
+            postsElement.appendChild(titleElement);
+        });
+
+    } catch (error) {
+        console.error("API通信でエラーが発生しました：", error);
+        postsElement.textContent = "データの取得に失敗しました。";
+    }
 }
 
 getPosts();
