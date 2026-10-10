@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -140,7 +140,8 @@ async function saveFirestorePost(title, body) {
         const newPost = {
             title: title,
             body: body,
-            userId: user.uid
+            userId: user.uid,
+            createdAt: serverTimestamp()
         };
 
         const docRef = await addDoc(postsRef, newPost);
