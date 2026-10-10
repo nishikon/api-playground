@@ -226,12 +226,51 @@ async function deletePost(postId) {
 
 const postForm = document.getElementById("post-form");
 
-postForm.addEventListener("submit", (event) => {
+postForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const title = document.getElementById("post-title").value;
   const body = document.getElementById("post-body").value;
+  const success = await submitPost(title, body);
 
-  console.log("タイトル:", title);
-  console.log("本文:", body);
+  if (success) {
+    alert("投稿に成功しました！");
+    postForm.reset();
+  } else {
+    alert("投稿に失敗しました。");
+  }
 });
+
+
+async function submitPost(title, body) {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            title: title,
+            body: body,
+            userId: 1
+          })
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      console.log("POST成功:", data);
+  
+      return true;
+  
+    } catch (error) {
+      console.error("POSTエラー:", error);
+      return false;
+    }
+  }
