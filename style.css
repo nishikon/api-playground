@@ -29,3 +29,21 @@ h1 {
     border: 1px solid #dce3ea;
     border-radius: 8px;
 }
+
+.post-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: #fff;
+  }
+  
+  .post-card h2 {
+    font-size: 18px;
+    margin-top: 0;
+  }
+  
+  .post-card p {
+    color: #555;
+    line-height: 1.6;
+  }

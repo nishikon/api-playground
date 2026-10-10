@@ -20,13 +20,25 @@ async function getPosts() {
         postsElement.replaceChildren();
         
         data.slice(0, 5).forEach((post) => {
+            // カード全体を作成
+            const cardElement = document.createElement("div");
+            cardElement.className = "post-card";
+          
+            // タイトルを作成
             const titleElement = document.createElement("h2");
-
             titleElement.textContent = post.title;
-
-            postsElement.appendChild(titleElement);
-            
-        });
+          
+            // 本文を作成
+            const bodyElement = document.createElement("p");
+            bodyElement.textContent = post.body;
+          
+            // タイトルと本文をカードの中に入れる
+            cardElement.appendChild(titleElement);
+            cardElement.appendChild(bodyElement);
+          
+            // カードを投稿一覧に追加
+            postsElement.appendChild(cardElement);
+          });
 
     } catch (error) {
         console.error("API通信でエラーが発生しました：", error);
