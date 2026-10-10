@@ -18,27 +18,34 @@ async function getPosts() {
         const data = await response.json();
 
         postsElement.replaceChildren();
-        
+
         data.slice(0, 5).forEach((post) => {
             // カード全体を作成
             const cardElement = document.createElement("div");
             cardElement.className = "post-card";
-          
+
             // タイトルを作成
             const titleElement = document.createElement("h2");
             titleElement.textContent = post.title;
-          
+
             // 本文を作成
             const bodyElement = document.createElement("p");
             bodyElement.textContent = post.body;
-          
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "削除";
+
+            deleteButton.addEventListener("click", () => {
+                deletePost(post.id);
+            });
+
             // タイトルと本文をカードの中に入れる
             cardElement.appendChild(titleElement);
             cardElement.appendChild(bodyElement);
-          
+            cardElement.appendChild(deleteButton);
             // カードを投稿一覧に追加
             postsElement.appendChild(cardElement);
-          });
+        });
 
     } catch (error) {
         console.error("API通信でエラーが発生しました：", error);
@@ -55,131 +62,152 @@ const newPost = {
     title: "APIの勉強",
     body: "POSTリクエストの練習をしています",
     userId: 1
-  };
+};
 
-  async function createPost() {
+async function createPost() {
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(newPost)
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newPost)
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
         }
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
-  
-      const data = await response.json();
-  
-      console.log(data);
-  
+
+        const data = await response.json();
+
+        console.log(data);
+
     } catch (error) {
-      console.error("POSTエラー:", error);
+        console.error("POSTエラー:", error);
     }
-  }
-  
-  createPost();
+}
+
+createPost();
 
 
-  const updatedPost = {
+const updatedPost = {
     id: 1,
     title: "APIの勉強（更新版）",
     body: "PUTリクエストを勉強しています",
     userId: 1
-  };
-  
-  async function updatePost() {
+};
+
+async function updatePost() {
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts/1",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(updatedPost)
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts/1",
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(updatedPost)
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
         }
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
-  
-      const data = await response.json();
-  
-      console.log("PUTの結果:", data);
-  
+
+        const data = await response.json();
+
+        console.log("PUTの結果:", data);
+
     } catch (error) {
-      console.error("PUTエラー:", error);
+        console.error("PUTエラー:", error);
     }
-  }
-  
-  updatePost();
+}
+
+updatePost();
 
 
-  const patchedPost = {
+const patchedPost = {
     title: "PATCHでタイトルを変更しました"
-  };
-  
-  async function patchPost() {
+};
+
+async function patchPost() {
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts/1",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(patchedPost)
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts/1",
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(patchedPost)
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
         }
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
-  
-      const data = await response.json();
-  
-      console.log("PATCHの結果:", data);
-  
+
+        const data = await response.json();
+
+        console.log("PATCHの結果:", data);
+
     } catch (error) {
-      console.error("PATCHエラー:", error);
+        console.error("PATCHエラー:", error);
     }
-  }
-  
-  patchPost();
+}
+
+patchPost();
 
 
-  async function deletePost() {
+async function deletePost() {
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts/1",
-        {
-          method: "DELETE"
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts/1",
+            {
+                method: "DELETE"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
         }
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
-  
-      console.log("DELETE成功:", response.status);
-  
+
+        console.log("DELETE成功:", response.status);
+
     } catch (error) {
-      console.error("DELETEエラー:", error);
+        console.error("DELETEエラー:", error);
     }
-  }
-  
-  deletePost();
+}
+
+deletePost();
 
 
-  const loadButton = document.getElementById("load-posts");
+const loadButton = document.getElementById("load-posts");
 
 loadButton.addEventListener("click", () => {
     getPosts();
 });
+
+
+async function deletePost(postId) {
+    try {
+        const response = await fetch(
+            `https://jsonplaceholder.typicode.com/posts/${postId}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
+        }
+
+        console.log(`投稿ID ${postId} の削除に成功しました`);
+
+    } catch (error) {
+        console.error("DELETEエラー:", error);
+    }
+}
