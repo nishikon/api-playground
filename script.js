@@ -1,6 +1,8 @@
 async function getPosts() {
     const postsElement = document.getElementById("posts");
 
+
+    loadButton.disabled = true;
     postsElement.textContent = "読み込み中...";
 
     try {
@@ -29,6 +31,8 @@ async function getPosts() {
     } catch (error) {
         console.error("API通信でエラーが発生しました：", error);
         postsElement.textContent = "データの取得に失敗しました。";
+    } finally {
+        loadButton.disabled = false;
     }
 }
 
