@@ -68,7 +68,7 @@ async function getFirestorePosts() {
                 });
 
                 card.appendChild(deleteButton);
-                
+
                 const editButton = document.createElement("button");
                 editButton.textContent = "編集";
 
@@ -207,9 +207,7 @@ firestoreForm.addEventListener("submit", async (event) => {
         if (success) {
             firestoreMessage.textContent = "保存に成功しました！";
             firestoreForm.reset();
-
-            watchFirestorePosts();
-
+            
         } else {
             firestoreMessage.textContent = "保存に失敗しました";
         }
@@ -253,10 +251,10 @@ async function updateFirestorePost(postId, newTitle, newBody) {
 
 function watchFirestorePosts() {
     onSnapshot(collection(db, "posts"), (snapshot) => {
-      console.log("Firestoreのデータを取得しました");
-  
-      snapshot.forEach((doc) => {
-        console.log(doc.id, doc.data());
-      });
+        console.log("Firestoreのデータを取得しました");
+
+        snapshot.forEach((doc) => {
+            console.log(doc.id, doc.data());
+        });
     });
-  }
+}
