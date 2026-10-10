@@ -245,9 +245,16 @@ async function updateFirestorePost(postId, newTitle, newBody) {
 }
 
 function watchFirestorePosts() {
-    onSnapshot(collection(db, "posts"), (snapshot) => {
-        console.log("Firestoreのデータを取得しました");
+    onSnapshot(
+        collection(db, "posts"),
 
-        renderFirestorePosts(snapshot);
-    });
+        (snapshot) => {
+            console.log("Firestoreのデータを取得しました");
+            renderFirestorePosts(snapshot);
+        },
+
+        (error) => {
+            console.error("Firestoreの監視エラー:", error);
+        }
+    );
 }
