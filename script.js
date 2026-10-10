@@ -1,6 +1,8 @@
 async function getPosts() {
     const postsElement = document.getElementById("posts");
 
+    postsElement.textContent = "読み込み中...";
+
     try {
         const response = await fetch(
             "https://jsonplaceholder.typicode.com/posts"
