@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { doc, getDoc, getFirestore } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getDocs, getFirestore } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 
 
 
@@ -17,31 +17,36 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function getFirestorePost() {
+async function getFirestorePosts() {
     try {
-        const postRef = doc(db, "posts", "post1");
-        const snapshot = await getDoc(postRef);
-
-        if (snapshot.exists()) {
-            const post = snapshot.data();
-
-            const container = document.getElementById("firestore-post");
-
-            const titleElement = document.createElement("h3");
-            titleElement.textContent = post.title;
-
-            const bodyElement = document.createElement("p");
-            bodyElement.textContent = post.body;
-
-            container.replaceChildren(titleElement, bodyElement);
-        } else {
-            console.log("投稿が見つかりません");
-        }
+      const postsRef = collection(db, "posts");
+      const snapshot = await getDocs(postsRef);
+  
+      const container = document.getElementById("firestore-post");
+      container.replaceChildren();
+  
+      snapshot.forEach((doc) => {
+        const post = doc.data();
+  
+        const card = document.createElement("div");
+        card.className = "post-card";
+  
+        const titleElement = document.createElement("h3");
+        titleElement.textContent = post.title;
+  
+        const bodyElement = document.createElement("p");
+        bodyElement.textContent = post.body;
+  
+        card.appendChild(titleElement);
+        card.appendChild(bodyElement);
+  
+        container.appendChild(card);
+      });
     } catch (error) {
-        console.error("Firestore取得エラー:", error);
+      console.error("Firestore取得エラー:", error);
     }
-}
-
-getFirestorePost();
+  }
+  
+  getFirestorePosts();
 
 console.log("Firebaseの初期化に成功しました");
