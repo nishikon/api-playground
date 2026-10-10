@@ -133,3 +133,26 @@ const newPost = {
   }
   
   patchPost();
+
+
+  async function deletePost() {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts/1",
+        {
+          method: "DELETE"
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+  
+      console.log("DELETE成功:", response.status);
+  
+    } catch (error) {
+      console.error("DELETEエラー:", error);
+    }
+  }
+  
+  deletePost();
