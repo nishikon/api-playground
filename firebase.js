@@ -40,36 +40,86 @@ async function getFirestorePosts() {
 
             card.appendChild(titleElement);
             card.appendChild(bodyElement);
-            
+
             const user = auth.currentUser;
-            
+
             // 自分の投稿だけ削除ボタンを表示
             if (user && post.userId === user.uid) {
-              const deleteButton = document.createElement("button");
-              deleteButton.textContent = "削除";
-            
-              deleteButton.addEventListener("click", async () => {
-                const confirmed = confirm("この投稿を削除しますか？");
-            
-                if (!confirmed) {
-                  return;
-                }
-            
-                deleteButton.disabled = true;
-            
-                const success = await deleteFirestorePost(doc.id);
-            
-                if (success) {
-                  card.remove();
-                } else {
-                  alert("削除に失敗しました");
-                  deleteButton.disabled = false;
-                }
-              });
-            
-              card.appendChild(deleteButton);
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "削除";
+
+                deleteButton.addEventListener("click", async () => {
+                    const confirmed = confirm("この投稿を削除しますか？");
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    deleteButton.disabled = true;
+
+                    const success = await deleteFirestorePost(doc.id);
+
+                    if (success) {
+                        card.remove();
+                    } else {
+                        alert("削除に失敗しました");
+                        deleteButton.disabled = false;
+                    }
+                });
+
+                card.appendChild(deleteButton);
+                
+                const editButton = document.createElement("button");
+                editButton.textContent = "編集";
+
+                editButton.addEventListener("click", async () => {
+                    // 現在のタイトルと本文を初期値として表示
+                    const newTitle = prompt("新しいタイトル", post.title);
+
+                    if (newTitle === null) {
+                        return;
+                    }
+
+                    const newBody = prompt("新しい本文", post.body);
+
+                    if (newBody === null) {
+                        return;
+                    }
+
+                    const title = newTitle.trim();
+                    const body = newBody.trim();
+
+                    if (!title || !body) {
+                        alert("タイトルと本文を入力してください");
+                        return;
+                    }
+
+                    if (title.length > 100 || body.length > 2000) {
+                        alert("タイトルは100文字以内、本文は2000文字以内にしてください");
+                        return;
+                    }
+
+                    editButton.disabled = true;
+
+                    const success = await updateFirestorePost(doc.id, title, body);
+
+                    if (success) {
+                        titleElement.textContent = title;
+                        bodyElement.textContent = body;
+
+                        // 次に編集するときのために値を更新
+                        post.title = title;
+                        post.body = body;
+                    } else {
+                        alert("更新に失敗しました");
+                    }
+
+                    editButton.disabled = false;
+                });
+
+                card.appendChild(editButton);
             }
-            
+
             container.appendChild(card);
         });
     } catch (error) {
@@ -118,9 +168,9 @@ async function loginAnonymously() {
         console.log("ユーザーID:", result.user.uid);
 
         // ログイン完了後に投稿一覧を取得する
-    await getFirestorePosts();
+        await getFirestorePosts();
 
-      
+
 
     } catch (error) {
         console.error("匿名ログインエラー:", error);
@@ -136,68 +186,68 @@ const firestoreSubmit = document.getElementById("firestore-submit");
 const firestoreMessage = document.getElementById("firestore-message");
 
 firestoreForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const title = firestoreTitle.value.trim();
-  const body = firestoreBody.value.trim();
+    const title = firestoreTitle.value.trim();
+    const body = firestoreBody.value.trim();
 
-  if (!title || !body) {
-    firestoreMessage.textContent = "タイトルと本文を入力してください";
-    return;
-  }
-
-  firestoreSubmit.disabled = true;
-  firestoreMessage.textContent = "保存中です...";
-
-  try {
-    // ログイン処理が完了するまで待つ
-    await auth.authStateReady();
-
-    const success = await saveFirestorePost(title, body);
-
-    if (success) {
-      firestoreMessage.textContent = "保存に成功しました！";
-      firestoreForm.reset();
-
-      // Firestoreから最新の投稿一覧を取得
-      await getFirestorePosts();
-    } else {
-      firestoreMessage.textContent = "保存に失敗しました";
+    if (!title || !body) {
+        firestoreMessage.textContent = "タイトルと本文を入力してください";
+        return;
     }
-  } finally {
-    firestoreSubmit.disabled = false;
-  }
+
+    firestoreSubmit.disabled = true;
+    firestoreMessage.textContent = "保存中です...";
+
+    try {
+        // ログイン処理が完了するまで待つ
+        await auth.authStateReady();
+
+        const success = await saveFirestorePost(title, body);
+
+        if (success) {
+            firestoreMessage.textContent = "保存に成功しました！";
+            firestoreForm.reset();
+
+            // Firestoreから最新の投稿一覧を取得
+            await getFirestorePosts();
+        } else {
+            firestoreMessage.textContent = "保存に失敗しました";
+        }
+    } finally {
+        firestoreSubmit.disabled = false;
+    }
 });
 
 async function deleteFirestorePost(postId) {
     try {
-      const postRef = doc(db, "posts", postId);
-  
-      await deleteDoc(postRef);
-  
-      console.log("Firestoreから削除しました:", postId);
-      return true;
-  
-    } catch (error) {
-      console.error("Firestore削除エラー:", error);
-      return false;
-    }
-  }
+        const postRef = doc(db, "posts", postId);
 
-  async function updateFirestorePost(postId, newTitle, newBody) {
-    try {
-      const postRef = doc(db, "posts", postId);
-  
-      await updateDoc(postRef, {
-        title: newTitle,
-        body: newBody
-      });
-  
-      console.log("Firestoreの投稿を更新しました:", postId);
-      return true;
-  
+        await deleteDoc(postRef);
+
+        console.log("Firestoreから削除しました:", postId);
+        return true;
+
     } catch (error) {
-      console.error("Firestore更新エラー:", error);
-      return false;
+        console.error("Firestore削除エラー:", error);
+        return false;
     }
-  }
+}
+
+async function updateFirestorePost(postId, newTitle, newBody) {
+    try {
+        const postRef = doc(db, "posts", postId);
+
+        await updateDoc(postRef, {
+            title: newTitle,
+            body: newBody
+        });
+
+        console.log("Firestoreの投稿を更新しました:", postId);
+        return true;
+
+    } catch (error) {
+        console.error("Firestore更新エラー:", error);
+        return false;
+    }
+}
