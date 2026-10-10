@@ -13,13 +13,15 @@ async function getPosts() {
 
         const data = await response.json();
 
-
+        postsElement.replaceChildren();
+        
         data.slice(0, 5).forEach((post) => {
             const titleElement = document.createElement("h2");
 
             titleElement.textContent = post.title;
 
             postsElement.appendChild(titleElement);
+            
         });
 
     } catch (error) {
@@ -28,7 +30,7 @@ async function getPosts() {
     }
 }
 
-getPosts();
+
 
 
 const newPost = {
@@ -161,5 +163,5 @@ const newPost = {
   const loadButton = document.getElementById("load-posts");
 
 loadButton.addEventListener("click", () => {
-  console.log("ボタンがクリックされました！");
+    getPosts();
 });
