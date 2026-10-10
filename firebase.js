@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getDocs, getFirestore, addDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getDocs, getFirestore, addDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -40,7 +40,36 @@ async function getFirestorePosts() {
 
             card.appendChild(titleElement);
             card.appendChild(bodyElement);
-
+            
+            const user = auth.currentUser;
+            
+            // 自分の投稿だけ削除ボタンを表示
+            if (user && post.userId === user.uid) {
+              const deleteButton = document.createElement("button");
+              deleteButton.textContent = "削除";
+            
+              deleteButton.addEventListener("click", async () => {
+                const confirmed = confirm("この投稿を削除しますか？");
+            
+                if (!confirmed) {
+                  return;
+                }
+            
+                deleteButton.disabled = true;
+            
+                const success = await deleteFirestorePost(doc.id);
+            
+                if (success) {
+                  card.remove();
+                } else {
+                  alert("削除に失敗しました");
+                  deleteButton.disabled = false;
+                }
+              });
+            
+              card.appendChild(deleteButton);
+            }
+            
             container.appendChild(card);
         });
     } catch (error) {
@@ -87,6 +116,9 @@ async function loginAnonymously() {
 
         console.log("匿名ログイン成功");
         console.log("ユーザーID:", result.user.uid);
+
+        // ログイン完了後に投稿一覧を取得する
+    await getFirestorePosts();
 
       
 
@@ -136,3 +168,18 @@ firestoreForm.addEventListener("submit", async (event) => {
     firestoreSubmit.disabled = false;
   }
 });
+
+async function deleteFirestorePost(postId) {
+    try {
+      const postRef = doc(db, "posts", postId);
+  
+      await deleteDoc(postRef);
+  
+      console.log("Firestoreから削除しました:", postId);
+      return true;
+  
+    } catch (error) {
+      console.error("Firestore削除エラー:", error);
+      return false;
+    }
+  }
