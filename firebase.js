@@ -320,10 +320,7 @@ export  async function saveImportedPost(post) {
       (snapshot) => {
         console.log("外部APIの保存データを取得しました");
   
-        snapshot.forEach((doc) => {
-          console.log("ドキュメントID:", doc.id);
-          console.log("保存データ:", doc.data());
-        });
+        renderImportedPosts(snapshot);
       },
   
       (error) => {
@@ -333,3 +330,31 @@ export  async function saveImportedPost(post) {
   }
 
   watchImportedPosts();
+
+  function renderImportedPosts(snapshot) {
+    const container = document.getElementById("imported-posts");
+  
+    container.replaceChildren();
+  
+    snapshot.forEach((doc) => {
+      const post = doc.data();
+  
+      const card = document.createElement("div");
+      card.className = "post-card";
+  
+      const title = document.createElement("h3");
+      title.textContent = post.title;
+  
+      const body = document.createElement("p");
+      body.textContent = post.body;
+  
+      const source = document.createElement("small");
+      source.textContent = `取得元: ${post.source}`;
+  
+      card.appendChild(title);
+      card.appendChild(body);
+      card.appendChild(source);
+  
+      container.appendChild(card);
+    });
+  }
