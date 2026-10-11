@@ -1032,3 +1032,5 @@ evaluation error at L8:30 for 'create' @ L8, evaluation error at L22:30 for 'upd
 
 Oct 11, 2026 5:49:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected non-HTTP/2 connection.
+Oct 11, 2026 5:50:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
