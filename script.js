@@ -140,7 +140,7 @@ async function patchPost() {
 patchPost();
 
 
-async function deletePost() {
+async function testDeletePost() {
     try {
         const response = await fetch(
             "https://jsonplaceholder.typicode.com/posts/1",
@@ -160,7 +160,7 @@ async function deletePost() {
     }
 }
 
-deletePost();
+testDeletePost();
 
 
 const loadButton = document.getElementById("load-posts");
