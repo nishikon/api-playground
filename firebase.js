@@ -369,9 +369,23 @@ function renderImportedPosts(snapshot) {
         const source = document.createElement("small");
         source.textContent = `取得元: ${post.source}`;
 
+        const createdAt = document.createElement("p");
+
+        createdAt.textContent = post.createdAt
+            ? `作成日時: ${post.createdAt.toDate().toLocaleString("ja-JP")}`
+            : "作成日時: 不明";
+
+        const updatedAt = document.createElement("p");
+
+        updatedAt.textContent = post.updatedAt
+            ? `更新日時: ${post.updatedAt.toDate().toLocaleString("ja-JP")}`
+            : "更新日時: 不明";
+
         card.appendChild(title);
         card.appendChild(body);
         card.appendChild(source);
+        card.appendChild(createdAt);
+        card.appendChild(updatedAt);
 
         container.appendChild(card);
     });
