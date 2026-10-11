@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 
 type Post = {
   userId: number;
@@ -7,29 +7,34 @@ type Post = {
   body: string;
 };
 
-async function getPosts() {
+async function searchPosts() {
   try {
-    const response = await fetch(
-      "https://jsonplaceholder.typicode.com/posts?_limit=10"
-    );
+    // JSONファイルを読み込む
+    const file = await readFile("posts.json", "utf-8");
 
-    if (!response.ok) {
-      throw new Error(`HTTPエラー: ${response.status}`);
-    }
+    // JSON文字列をJavaScriptの配列に変換
+    const data: Post[] = JSON.parse(file);
 
-    const data: Post[] = await response.json();
+    // 検索キーワード
+    const keyword = "qui";
 
-    await writeFile(
-      "posts.json",
-      JSON.stringify(data, null, 2),
-      "utf-8"
-    );
+    // タイトルと本文を検索
+    const results = data.filter((post) => {
+      return (
+        post.title.includes(keyword) ||
+        post.body.includes(keyword)
+      );
+    });
 
-    console.log(`${data.length}件の記事を保存しました！`);
+    console.log(`検索結果: ${results.length}件`);
+
+    results.forEach((post) => {
+      console.log(`${post.id}. ${post.title}`);
+    });
 
   } catch (error) {
-    console.error("処理に失敗しました:", error);
+    console.error("検索に失敗しました:", error);
   }
 }
 
-getPosts();
+searchPosts();
