@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc, runTransaction, orderBy } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -323,7 +323,8 @@ async function watchImportedPosts() {
 
     const myPostsQuery = query(
         importedPostsRef,
-        where("userId", "==", user.uid)
+        where("userId", "==", user.uid),
+        orderBy("updatedAt", "desc")
     );
 
     onSnapshot(
