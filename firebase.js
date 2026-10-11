@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
