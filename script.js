@@ -336,6 +336,38 @@ function createPostCard(post) {
     "save-imported-post"
   );
   
-  saveImportedButton.addEventListener("click", () => {
-    console.log("APIデータ保存ボタンが押されました");
+  saveImportedButton.addEventListener("click", async () => {
+    const message = document.getElementById("imported-message");
+  
+    saveImportedButton.disabled = true;
+    message.textContent = "保存中です...";
+  
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts/1"
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+  
+      const post = await response.json();
+  
+      const normalizedPost = normalizePost(post);
+  
+      const success = await saveImportedPost(normalizedPost);
+  
+      if (success) {
+        message.textContent = "保存に成功しました！";
+      } else {
+        message.textContent = "保存に失敗しました";
+      }
+  
+    } catch (error) {
+      console.error("APIデータ保存処理のエラー:", error);
+      message.textContent = "エラーが発生しました";
+  
+    } finally {
+      saveImportedButton.disabled = false;
+    }
   });
