@@ -114,33 +114,45 @@ try {
     console.log("テスト成功：本人は自分の投稿を編集できました");
 
     // 本人が投稿の所有者を変更しようとする
-await assertFails(
-    updateDoc(userPostRef, {
-      userId: "user999",
-    })
-  );
-  
-  console.log(
-    "テスト成功：本人でもuserIdを変更できませんでした"
-  );
+    await assertFails(
+        updateDoc(userPostRef, {
+            userId: "user999",
+        })
+    );
 
-  // user999がuser123の投稿を削除しようとする
-await assertFails(
-    deleteDoc(targetPostRef)
-  );
-  
-  console.log(
-    "テスト成功：他人の投稿を削除できませんでした"
-  );
+    console.log(
+        "テスト成功：本人でもuserIdを変更できませんでした"
+    );
 
-  // user123が自分の投稿を削除する
-await assertSucceeds(
-    deleteDoc(userPostRef)
-  );
-  
-  console.log(
-    "テスト成功：本人は自分の投稿を削除できました"
-  );
+    // user999がuser123の投稿を削除しようとする
+    await assertFails(
+        deleteDoc(targetPostRef)
+    );
+
+    console.log(
+        "テスト成功：他人の投稿を削除できませんでした"
+    );
+
+    // user123が自分の投稿を削除する
+    await assertSucceeds(
+        deleteDoc(userPostRef)
+    );
+
+    console.log(
+        "テスト成功：本人は自分の投稿を削除できました"
+    );
+
+    // 100文字を超えるタイトルで投稿しようとする
+    await assertFails(
+        setDoc(doc(userDb, "posts", "too-long-title"), {
+            title: "あ".repeat(101),
+            body: "本文です",
+            userId: "user123",
+            createdAt: serverTimestamp(),
+        })
+    );
+
+    console.log("テスト成功：長すぎるタイトルを拒否しました");
 
 } finally {
     // テスト環境を終了する
