@@ -369,6 +369,7 @@ saveImportedButton.addEventListener("click", async () => {
 
         message.textContent =
             `${successCount}件の保存に成功しました！`;
+            
 
     } catch (error) {
         console.error("APIデータ保存処理のエラー:", error);
