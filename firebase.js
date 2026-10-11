@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc, runTransaction, orderBy } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+import { collection, getFirestore, connectFirestoreEmulator, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc, runTransaction, orderBy } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { getAuth, signInAnonymously, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
 // Firebase Consoleに表示された設定情報
@@ -16,7 +16,20 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const useEmulator =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+
+if (useEmulator) {
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  console.log("Firestore Emulatorに接続しました");
+}
+
 const auth = getAuth(app);
+if (useEmulator) {
+    connectAuthEmulator(auth, "http://127.0.0.1:9099");
+    console.log("Authentication Emulatorに接続しました");
+  }
 
 function renderFirestorePosts(snapshot) {
     const container = document.getElementById("firestore-post");
