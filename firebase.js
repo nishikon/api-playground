@@ -266,3 +266,33 @@ function watchFirestorePosts() {
         }
     );
 }
+
+async function saveImportedPost(post) {
+    try {
+      await auth.authStateReady();
+  
+      const user = auth.currentUser;
+  
+      if (!user) {
+        console.error("ログインが必要です");
+        return false;
+      }
+  
+      const importedPostsRef = collection(db, "importedPosts");
+  
+      const newPost = {
+        ...post,
+        userId: user.uid,
+        createdAt: serverTimestamp()
+      };
+  
+      const docRef = await addDoc(importedPostsRef, newPost);
+  
+      console.log("外部APIデータの保存成功:", docRef.id);
+      return true;
+  
+    } catch (error) {
+      console.error("外部APIデータの保存エラー:", error);
+      return false;
+    }
+  }
