@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -267,94 +267,98 @@ function watchFirestorePosts() {
     );
 }
 
-export  async function saveImportedPost(post) {
+export async function saveImportedPost(post) {
     try {
-      await auth.authStateReady();
-  
-      const user = auth.currentUser;
-  
-      if (!user) {
-        console.error("ログインが必要です");
-        return false;
-      }
-  
-      const importedPostsRef = collection(db, "importedPosts");
-  
-      const newPost = {
-        ...post,
-        userId: user.uid,
-        createdAt: serverTimestamp()
-      };
-  
-      const docRef = await addDoc(importedPostsRef, newPost);
-  
-      console.log("外部APIデータの保存成功:", docRef.id);
-      return true;
-  
+        await auth.authStateReady();
+
+        const user = auth.currentUser;
+
+        if (!user) {
+            console.error("ログインが必要です");
+            return false;
+        }
+
+        const importedPostsRef = collection(db, "importedPosts");
+
+        const newPost = {
+            ...post,
+            userId: user.uid,
+            createdAt: serverTimestamp()
+        };
+
+        const documentId = `${user.uid}_${post.source}_${post.externalId}`;
+
+        const postRef = doc(db, "importedPosts", documentId);
+
+        await setDoc(postRef, newPost);
+
+        console.log("外部APIデータの保存成功:", documentId);
+        return true;
+
     } catch (error) {
-      console.error("外部APIデータの保存エラー:", error);
-      return false;
+        console.error("外部APIデータの保存エラー:", error);
+        return false;
     }
-  }
+}
 
-  async function watchImportedPosts() {
+async function watchImportedPosts() {
     await auth.authStateReady();
-  
+
     const user = auth.currentUser;
-  
+
     if (!user) {
-      console.error("ログインが必要です");
-      return;
+        console.error("ログインが必要です");
+        return;
     }
-  
+
     const importedPostsRef = collection(db, "importedPosts");
-  
+
     const myPostsQuery = query(
-      importedPostsRef,
-      where("userId", "==", user.uid)
+        importedPostsRef,
+        where("userId", "==", user.uid)
     );
-  
+
     onSnapshot(
-      myPostsQuery,
-  
-      (snapshot) => {
-        console.log("外部APIの保存データを取得しました");
-  
-        renderImportedPosts(snapshot);
-      },
-  
-      (error) => {
-        console.error("外部APIデータの取得エラー:", error);
-      }
+        myPostsQuery,
+
+        (snapshot) => {
+            console.log("外部APIの保存データを取得しました");
+
+            renderImportedPosts(snapshot);
+        },
+
+        (error) => {
+            console.error("外部APIデータの取得エラー:", error);
+        }
     );
-  }
+}
 
-  watchImportedPosts();
+watchImportedPosts();
 
-  function renderImportedPosts(snapshot) {
+function renderImportedPosts(snapshot) {
     const container = document.getElementById("imported-posts");
-  
+
     container.replaceChildren();
-  
+
     snapshot.forEach((doc) => {
-      const post = doc.data();
-  
-      const card = document.createElement("div");
-      card.className = "post-card";
-  
-      const title = document.createElement("h3");
-      title.textContent = post.title;
-  
-      const body = document.createElement("p");
-      body.textContent = post.body;
-  
-      const source = document.createElement("small");
-      source.textContent = `取得元: ${post.source}`;
-  
-      card.appendChild(title);
-      card.appendChild(body);
-      card.appendChild(source);
-  
-      container.appendChild(card);
+        const post = doc.data();
+
+        const card = document.createElement("div");
+        card.className = "post-card";
+
+        const title = document.createElement("h3");
+        title.textContent = post.title;
+
+        const body = document.createElement("p");
+        body.textContent = post.body;
+
+        const source = document.createElement("small");
+        source.textContent = `取得元: ${post.source}`;
+
+        card.appendChild(title);
+        card.appendChild(body);
+        card.appendChild(source);
+
+        container.appendChild(card);
     });
-  }
+}
