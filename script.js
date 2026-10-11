@@ -296,3 +296,36 @@ function createPostCard(post) {
       body: post.body
     };
   }
+
+  async function testNormalizePost() {
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts/1"
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+  
+      const post = await response.json();
+  
+      const normalizedPost = normalizePost(post);
+  
+      console.log("APIから取得したデータ:", post);
+      console.log("変換後のデータ:", normalizedPost);
+    } catch (error) {
+      console.error("データ取得エラー:", error);
+    }
+  }
+
+  testNormalizePost();
+
+  const samplePost = {
+    id: 10,
+    title: "AI Business",
+    body: "New business idea"
+  };
+  
+  const result = normalizePost(samplePost);
+  
+  console.log("変換後のデータ:", result);
