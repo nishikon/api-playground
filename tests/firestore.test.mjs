@@ -154,6 +154,21 @@ try {
 
     console.log("テスト成功：長すぎるタイトルを拒否しました");
 
+    // 想定外のフィールドを追加して保存しようとする
+    await assertFails(
+        setDoc(doc(userDb, "posts", "invalid-field"), {
+            title: "テスト投稿",
+            body: "本文です",
+            userId: "user123",
+            createdAt: serverTimestamp(),
+            isAdmin: true,
+        })
+    );
+
+    console.log(
+        "テスト成功：想定外のフィールドを拒否しました"
+    );
+
 } finally {
     // テスト環境を終了する
     await testEnv.cleanup();
