@@ -1,4 +1,4 @@
-import { saveImportedPost } from "./firebase.js";1
+import { saveImportedPost } from "./firebase.js"; 1
 
 async function getPosts() {
     const postsElement = document.getElementById("posts");
@@ -23,9 +23,9 @@ async function getPosts() {
 
         data.slice(0, 5).forEach((post) => {
             const card = createPostCard(post);
-          
+
             postsElement.appendChild(card);
-          });
+        });
 
     } catch (error) {
         console.error("API通信でエラーが発生しました：", error);
@@ -252,122 +252,129 @@ async function submitPost(title, body) {
 
 function addPostCard(post) {
     const postsElement = document.getElementById("posts");
-  
+
     const card = createPostCard(post);
-  
+
     postsElement.prepend(card);
-  }
+}
 
 function createPostCard(post) {
     const cardElement = document.createElement("div");
     cardElement.className = "post-card";
-  
+
     const titleElement = document.createElement("h2");
     titleElement.textContent = post.title;
-  
+
     const bodyElement = document.createElement("p");
     bodyElement.textContent = post.body;
-  
+
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "削除";
-  
+
     deleteButton.addEventListener("click", async () => {
-      deleteButton.disabled = true;
-  
-      const success = await deletePost(post.id);
-  
-      if (success) {
-        cardElement.remove();
-      } else {
-        deleteButton.disabled = false;
-      }
+        deleteButton.disabled = true;
+
+        const success = await deletePost(post.id);
+
+        if (success) {
+            cardElement.remove();
+        } else {
+            deleteButton.disabled = false;
+        }
     });
-  
+
     cardElement.appendChild(titleElement);
     cardElement.appendChild(bodyElement);
     cardElement.appendChild(deleteButton);
-  
+
     return cardElement;
-  }
+}
 
-  function normalizePost(post) {
+function normalizePost(post) {
     return {
-      source: "jsonplaceholder",
-      externalId: post.id,
-      title: post.title,
-      body: post.body
+        source: "jsonplaceholder",
+        externalId: post.id,
+        title: post.title,
+        body: post.body
     };
-  }
+}
 
-  async function testNormalizePost() {
+async function testNormalizePost() {
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts/1"
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
-  
-      const post = await response.json();
-  
-      const normalizedPost = normalizePost(post);
-  
-      console.log("APIから取得したデータ:", post);
-      console.log("変換後のデータ:", normalizedPost);
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts/1"
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
+        }
+
+        const post = await response.json();
+
+        const normalizedPost = normalizePost(post);
+
+        console.log("APIから取得したデータ:", post);
+        console.log("変換後のデータ:", normalizedPost);
     } catch (error) {
-      console.error("データ取得エラー:", error);
+        console.error("データ取得エラー:", error);
     }
-  }
+}
 
-  testNormalizePost();
+testNormalizePost();
 
-  const samplePost = {
+const samplePost = {
     id: 10,
     title: "AI Business",
     body: "New business idea"
-  };
-  
-  const result = normalizePost(samplePost);
-  
-  console.log("変換後のデータ:", result);
+};
 
-  const saveImportedButton = document.getElementById(
+const result = normalizePost(samplePost);
+
+console.log("変換後のデータ:", result);
+
+const saveImportedButton = document.getElementById(
     "save-imported-post"
-  );
-  
-  saveImportedButton.addEventListener("click", async () => {
+);
+
+saveImportedButton.addEventListener("click", async () => {
     const message = document.getElementById("imported-message");
-  
+
     saveImportedButton.disabled = true;
     message.textContent = "保存中です...";
-  
+
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts/1"
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
-  
-      const post = await response.json();
-  
-      const normalizedPost = normalizePost(post);
-  
-      const success = await saveImportedPost(normalizedPost);
-  
-      if (success) {
-        message.textContent = "保存に成功しました！";
-      } else {
-        message.textContent = "保存に失敗しました";
-      }
-  
+        const response = await fetch(
+            "https://jsonplaceholder.typicode.com/posts"
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTPエラー: ${response.status}`);
+        }
+
+        const posts = await response.json();
+
+        const firstThreePosts = posts.slice(0, 3);
+
+        let successCount = 0;
+
+        for (const post of firstThreePosts) {
+            const normalizedPost = normalizePost(post);
+
+            const success = await saveImportedPost(normalizedPost);
+
+            if (success) {
+                successCount++;
+            }
+        }
+
+        message.textContent =
+            `${successCount}件の保存に成功しました！`;
+
     } catch (error) {
-      console.error("APIデータ保存処理のエラー:", error);
-      message.textContent = "エラーが発生しました";
-  
+        console.error("APIデータ保存処理のエラー:", error);
+        message.textContent = "エラーが発生しました";
+
     } finally {
-      saveImportedButton.disabled = false;
+        saveImportedButton.disabled = false;
     }
-  });
+});
