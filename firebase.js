@@ -267,7 +267,7 @@ function watchFirestorePosts() {
     );
 }
 
-export async function saveImportedPost(post) {
+export  async function saveImportedPost(post) {
     try {
       await auth.authStateReady();
   

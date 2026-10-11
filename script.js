@@ -1,4 +1,4 @@
-import { saveImportedPost } from "./firebase.js";
+import { saveImportedPost } from "./firebase.js";1
 
 async function getPosts() {
     const postsElement = document.getElementById("posts");
@@ -331,3 +331,11 @@ function createPostCard(post) {
   const result = normalizePost(samplePost);
   
   console.log("変換後のデータ:", result);
+
+  const saveImportedButton = document.getElementById(
+    "save-imported-post"
+  );
+  
+  saveImportedButton.addEventListener("click", () => {
+    console.log("APIデータ保存ボタンが押されました");
+  });
