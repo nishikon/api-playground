@@ -287,3 +287,12 @@ function createPostCard(post) {
   
     return cardElement;
   }
+
+  function normalizePost(post) {
+    return {
+      source: "jsonplaceholder",
+      externalId: post.id,
+      title: post.title,
+      body: post.body
+    };
+  }
