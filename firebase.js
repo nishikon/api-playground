@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -296,3 +296,40 @@ export  async function saveImportedPost(post) {
       return false;
     }
   }
+
+  async function watchImportedPosts() {
+    await auth.authStateReady();
+  
+    const user = auth.currentUser;
+  
+    if (!user) {
+      console.error("ログインが必要です");
+      return;
+    }
+  
+    const importedPostsRef = collection(db, "importedPosts");
+  
+    const myPostsQuery = query(
+      importedPostsRef,
+      where("userId", "==", user.uid)
+    );
+  
+    onSnapshot(
+      myPostsQuery,
+  
+      (snapshot) => {
+        console.log("外部APIの保存データを取得しました");
+  
+        snapshot.forEach((doc) => {
+          console.log("ドキュメントID:", doc.id);
+          console.log("保存データ:", doc.data());
+        });
+      },
+  
+      (error) => {
+        console.error("外部APIデータの取得エラー:", error);
+      }
+    );
+  }
+
+  watchImportedPosts();
