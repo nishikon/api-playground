@@ -283,23 +283,23 @@ export async function saveImportedPost(post) {
         const documentId = `${user.uid}_${post.source}_${post.externalId}`;
 
         const postRef = doc(db, "importedPosts", documentId);
-        
+
         await runTransaction(db, async (transaction) => {
-          const snapshot = await transaction.get(postRef);
-        
-          const newPost = {
-            ...post,
-            userId: user.uid,
-            updatedAt: serverTimestamp()
-          };
-        
-          if (!snapshot.exists()) {
-            newPost.createdAt = serverTimestamp();
-          }
-        
-          transaction.set(postRef, newPost, { merge: true });
+            const snapshot = await transaction.get(postRef);
+
+            const newPost = {
+                ...post,
+                userId: user.uid,
+                updatedAt: serverTimestamp()
+            };
+
+            if (!snapshot.exists()) {
+                newPost.createdAt = serverTimestamp();
+            }
+
+            transaction.set(postRef, newPost, { merge: true });
         });
-        
+
         console.log("外部APIデータの保存成功:", documentId);
         return true;
 
@@ -332,6 +332,11 @@ async function watchImportedPosts() {
 
         (snapshot) => {
             console.log("外部APIの保存データを取得しました");
+            console.log("取得件数:", snapshot.size);
+
+            snapshot.forEach((doc) => {
+                console.log("取得データ:", doc.id, doc.data());
+            });
 
             renderImportedPosts(snapshot);
         },
