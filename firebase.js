@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+import { collection, getFirestore, addDoc, doc, deleteDoc, updateDoc, onSnapshot, serverTimestamp, query, where, setDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 
 
@@ -280,18 +280,26 @@ export async function saveImportedPost(post) {
 
         const importedPostsRef = collection(db, "importedPosts");
 
-        const newPost = {
-            ...post,
-            userId: user.uid,
-            createdAt: serverTimestamp()
-        };
-
         const documentId = `${user.uid}_${post.source}_${post.externalId}`;
 
         const postRef = doc(db, "importedPosts", documentId);
-
-        await setDoc(postRef, newPost);
-
+        
+        await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(postRef);
+        
+          const newPost = {
+            ...post,
+            userId: user.uid,
+            updatedAt: serverTimestamp()
+          };
+        
+          if (!snapshot.exists()) {
+            newPost.createdAt = serverTimestamp();
+          }
+        
+          transaction.set(postRef, newPost, { merge: true });
+        });
+        
         console.log("外部APIデータの保存成功:", documentId);
         return true;
 
