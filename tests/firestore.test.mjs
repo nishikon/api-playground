@@ -9,6 +9,8 @@ import { readFileSync } from "node:fs";
 import {
     doc,
     setDoc,
+    updateDoc,
+    deleteDoc,
     serverTimestamp,
 } from "firebase/firestore";
 
@@ -85,6 +87,60 @@ try {
     );
 
     console.log("テスト成功：他人のUIDでは保存できませんでした");
+
+    // 別のログイン済みユーザーを作る
+    const anotherContext = testEnv.authenticatedContext("user999");
+    const anotherDb = anotherContext.firestore();
+
+    // user123が作成した投稿を、user999が編集しようとする
+    const targetPostRef = doc(anotherDb, "posts", "test-post-2");
+
+    await assertFails(
+        updateDoc(targetPostRef, {
+            title: "他人が書き換えたタイトル",
+        })
+    );
+
+    console.log("テスト成功：他人の投稿を編集できませんでした");
+
+    // user123が自分の投稿を編集する
+    await assertSucceeds(
+        updateDoc(userPostRef, {
+            title: "本人が編集したタイトル",
+            body: "本人による更新テスト",
+        })
+    );
+
+    console.log("テスト成功：本人は自分の投稿を編集できました");
+
+    // 本人が投稿の所有者を変更しようとする
+await assertFails(
+    updateDoc(userPostRef, {
+      userId: "user999",
+    })
+  );
+  
+  console.log(
+    "テスト成功：本人でもuserIdを変更できませんでした"
+  );
+
+  // user999がuser123の投稿を削除しようとする
+await assertFails(
+    deleteDoc(targetPostRef)
+  );
+  
+  console.log(
+    "テスト成功：他人の投稿を削除できませんでした"
+  );
+
+  // user123が自分の投稿を削除する
+await assertSucceeds(
+    deleteDoc(userPostRef)
+  );
+  
+  console.log(
+    "テスト成功：本人は自分の投稿を削除できました"
+  );
 
 } finally {
     // テスト環境を終了する
