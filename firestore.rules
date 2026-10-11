@@ -52,6 +52,9 @@ service cloud.firestore {
 
                 allow delete: if false;
             }
-
+            match /articles/{articleId} {
+                allow read: if true;
+                allow write: if false;
+            }
         }
     }
