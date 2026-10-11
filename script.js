@@ -1,3 +1,5 @@
+import { saveImportedPost } from "./firebase.js";
+
 async function getPosts() {
     const postsElement = document.getElementById("posts");
 
