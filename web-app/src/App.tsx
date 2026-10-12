@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getHelloMessage, searchArticles, type Article } from "./api";
+import { getHelloMessage } from "./api";
+import { useArticleSearch } from "./useArticleSearch";
 import { useArticles } from "./useArticles";
 
 function App() {
@@ -15,11 +16,13 @@ function App() {
 
   const [searchText, setSearchText] = useState("");
   const [apiMessage, setApiMessage] = useState("読み込み中...");
-  const [searchResults, setSearchResults] = useState<Article[]>([]);
-  const [searchedKeyword, setSearchedKeyword] = useState("");
-  const [searchError, setSearchError] = useState("");
-
-  const keyword = searchText.trim();
+  
+  const {
+    keyword,
+    searchResults,
+    searchPending,
+    searchError,
+  } = useArticleSearch(searchText);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,47 +51,7 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (keyword === "") return;
-
-    let cancelled = false;
-    const controller = new AbortController();
-
-    const timer = setTimeout(() => {
-      async function runSearch() {
-        try {
-          const data = await searchArticles(keyword, controller.signal);
-
-          if (!cancelled) {
-            setSearchResults(data.articles);
-            setSearchError("");
-            setSearchedKeyword(keyword);
-          }
-        } catch (err) {
-          if (controller.signal.aborted) return;
-          
-          console.error(err);
-
-          if (!cancelled) {
-            setSearchError(
-              err instanceof Error ? err.message : "検索に失敗しました"
-            );
-            setSearchedKeyword(keyword);
-          }
-        }
-      }
-
-      void runSearch();
-    }, 400);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [keyword]);
-
-  const searchPending = keyword !== "" && searchedKeyword !== keyword;
+  
 
   return (
     <main>
