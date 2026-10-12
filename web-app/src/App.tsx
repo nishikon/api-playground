@@ -17,9 +17,28 @@ function App() {
 
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [apiMessage, setApiMessage] = useState("読み込み中...");
 
   useEffect(() => {
     let cancelled = false;
+
+    async function fetchMessage() {
+      try {
+        const response = await fetch("/api/hello");
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data: { message: string } = await response.json();
+        setApiMessage(data.message);
+      } catch (error) {
+        console.error(error);
+        setApiMessage("APIとの通信に失敗しました");
+      }
+    }
+
+    void fetchMessage();
 
     async function fetchArticles() {
       try {
@@ -100,6 +119,8 @@ function App() {
   return (
     <main>
       <h1>リサーチアプリ</h1>
+      <h2>自作APIからのメッセージ</h2>
+      <p>{apiMessage}</p>
 
       <input
         type="text"
