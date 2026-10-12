@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where, orderBy, limit, startAfter, type DocumentSnapshot, } from "firebase/firestore";
-import { db } from "./firebase";
 
 type Article = {
   id: string;
@@ -12,59 +10,37 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [lastDoc, setLastDoc] =
-    useState<DocumentSnapshot | null>(null);
-
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [apiMessage, setApiMessage] = useState("読み込み中...");
 
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchMessage() {
+    async function fetchData() {
       try {
-        const response = await fetch("/api/hello");
+        const [helloResponse, articlesResponse] = await Promise.all([
+          fetch("/api/hello"),
+          fetch("/api/articles"),
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        if (!helloResponse.ok || !articlesResponse.ok) {
+          throw new Error("API通信に失敗しました");
         }
 
-        const data: { message: string } = await response.json();
-        setApiMessage(data.message);
-      } catch (error) {
-        console.error(error);
-        setApiMessage("APIとの通信に失敗しました");
-      }
-    }
+        const helloData: { message: string } =
+          await helloResponse.json();
 
-    void fetchMessage();
-
-    async function fetchArticles() {
-      try {
-        const articlesQuery = query(
-          collection(db, "articles"),
-          where("userId", "==", 1),
-          orderBy("id", "desc"),
-          limit(3)
-        );
-
-        const snapshot = await getDocs(articlesQuery);
-
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          title: String(doc.data().title ?? ""),
-        }));
+        const articlesData: Article[] =
+          await articlesResponse.json();
 
         if (!cancelled) {
-          setArticles(data);
-          setLastDoc(snapshot.docs.at(-1) ?? null);
-          setHasMore(snapshot.docs.length === 3);
+          setApiMessage(helloData.message);
+          setArticles(articlesData);
         }
       } catch (err) {
         console.error(err);
         if (!cancelled) {
-          setError("記事の取得に失敗しました");
+          setError("APIからデータを取得できませんでした");
+          setApiMessage("APIとの通信に失敗しました");
         }
       } finally {
         if (!cancelled) {
@@ -73,44 +49,12 @@ function App() {
       }
     }
 
-    void fetchArticles();
+    void fetchData();
 
     return () => {
       cancelled = true;
     };
   }, []);
-
-  async function loadMore() {
-    if (!lastDoc || !hasMore || loadingMore) return;
-
-    setLoadingMore(true);
-
-    try {
-      const nextQuery = query(
-        collection(db, "articles"),
-        where("userId", "==", 1),
-        orderBy("id", "desc"),
-        startAfter(lastDoc),
-        limit(3)
-      );
-
-      const snapshot = await getDocs(nextQuery);
-
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        title: String(doc.data().title ?? ""),
-      }));
-
-      setArticles((prev) => [...prev, ...data]);
-      setLastDoc(snapshot.docs.at(-1) ?? null);
-      setHasMore(snapshot.docs.length === 3);
-    } catch (err) {
-      console.error(err);
-      setError("追加の記事の取得に失敗しました");
-    } finally {
-      setLoadingMore(false);
-    }
-  }
 
   const filteredArticles = articles.filter((article) =>
     article.title.toLowerCase().includes(searchText.toLowerCase())
@@ -119,6 +63,7 @@ function App() {
   return (
     <main>
       <h1>リサーチアプリ</h1>
+
       <h2>自作APIからのメッセージ</h2>
       <p>{apiMessage}</p>
 
@@ -141,19 +86,10 @@ function App() {
             <p>一致する記事がありません</p>
           ) : (
             <ul>
-              {hasMore && !error && (
-                <button
-                  onClick={() => void loadMore()}
-                  disabled={loadingMore}
-                >
-                  {loadingMore ? "取得中..." : "さらに読み込む"}
-                </button>
-              )}
               {filteredArticles.map((article) => (
                 <li key={article.id}>{article.title}</li>
               ))}
             </ul>
-
           )}
         </>
       )}
