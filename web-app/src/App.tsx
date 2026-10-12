@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getHelloMessage } from "./api";
+import { getHelloMessage, searchArticles, type Article } from "./api";
 import { useArticles } from "./useArticles";
 
 function App() {
@@ -15,6 +15,11 @@ function App() {
 
   const [searchText, setSearchText] = useState("");
   const [apiMessage, setApiMessage] = useState("読み込み中...");
+  const [searchResults, setSearchResults] = useState<Article[]>([]);
+  const [searchedKeyword, setSearchedKeyword] = useState("");
+  const [searchError, setSearchError] = useState("");
+
+  const keyword = searchText.trim();
 
   useEffect(() => {
     let cancelled = false;
@@ -42,9 +47,43 @@ function App() {
     };
   }, []);
 
-  const filteredArticles = articles.filter((article) =>
-    article.title.toLowerCase().includes(searchText.toLowerCase())
-  );
+  useEffect(() => {
+    if (keyword === "") return;
+
+    let cancelled = false;
+
+    const timer = setTimeout(() => {
+      async function runSearch() {
+        try {
+          const data = await searchArticles(keyword);
+
+          if (!cancelled) {
+            setSearchResults(data.articles);
+            setSearchError("");
+            setSearchedKeyword(keyword);
+          }
+        } catch (err) {
+          console.error(err);
+
+          if (!cancelled) {
+            setSearchError(
+              err instanceof Error ? err.message : "検索に失敗しました"
+            );
+            setSearchedKeyword(keyword);
+          }
+        }
+      }
+
+      void runSearch();
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [keyword]);
+
+  const searchPending = keyword !== "" && searchedKeyword !== keyword;
 
   return (
     <main>
@@ -60,31 +99,44 @@ function App() {
         onChange={(e) => setSearchText(e.target.value)}
       />
 
-      {loading ? (
+      {keyword !== "" ? (
+        searchPending ? (
+          <p>検索中...</p>
+        ) : searchError ? (
+          <p role="alert">{searchError}</p>
+        ) : (
+          <>
+            <p>検索結果：{searchResults.length}件</p>
+
+            {searchResults.length === 0 ? (
+              <p>一致する記事がありません</p>
+            ) : (
+              <ul>
+                {searchResults.map((article) => (
+                  <li key={article.id}>{article.title}</li>
+                ))}
+              </ul>
+            )}
+          </>
+        )
+      ) : loading ? (
         <p>読み込み中...</p>
       ) : error ? (
         <p role="alert">{error}</p>
       ) : (
         <>
-          <p>検索結果：{filteredArticles.length}件</p>
+          <p>表示中の記事：{articles.length}件</p>
 
-          {filteredArticles.length === 0 ? (
-            <p>一致する記事がありません</p>
-          ) : (
-            <ul>
-              {filteredArticles.map((article) => (
-                <li key={article.id}>{article.title}</li>
-              ))}
-            </ul>
-          )}
+          <ul>
+            {articles.map((article) => (
+              <li key={article.id}>{article.title}</li>
+            ))}
+          </ul>
 
           {loadMoreError && <p role="alert">{loadMoreError}</p>}
 
           {hasMore && (
-            <button
-              onClick={() => void loadMore()}
-              disabled={loadingMore}
-            >
+            <button onClick={() => void loadMore()} disabled={loadingMore}>
               {loadingMore ? "取得中..." : "さらに読み込む"}
             </button>
           )}

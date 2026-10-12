@@ -37,3 +37,9 @@ export type Article = {
   
     return requestJson<ArticlesResponse>(url);
   }
+
+  export async function searchArticles(keyword: string) {
+    const url = `/api/articles/search?q=${encodeURIComponent(keyword)}`;
+  
+    return requestJson<{ articles: Article[] }>(url);
+  }
