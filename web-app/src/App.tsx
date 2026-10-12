@@ -80,7 +80,13 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const errorData: { error?: string } = await response
+          .json()
+          .catch(() => ({}));
+
+        throw new Error(
+          errorData.error ?? `APIエラー（HTTP ${response.status}）`
+        );
       }
 
       const data: ArticlesResponse = await response.json();
@@ -90,7 +96,15 @@ function App() {
       setNextCursor(data.nextCursor);
     } catch (err) {
       console.error(err);
-      setLoadMoreError("追加の記事を取得できませんでした");
+
+      if (err instanceof TypeError) {
+        setLoadMoreError("サーバーに接続できませんでした");
+      } else if (err instanceof Error) {
+        setLoadMoreError(err.message);
+      } else {
+        setLoadMoreError("追加の記事を取得できませんでした");
+      }
+
     } finally {
       setLoadingMore(false);
     }
