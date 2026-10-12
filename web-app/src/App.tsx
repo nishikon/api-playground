@@ -11,6 +11,9 @@ function App() {
   const [error, setError] = useState("");
   const [searchText, setSearchText] = useState("");
   const [apiMessage, setApiMessage] = useState("読み込み中...");
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +59,35 @@ function App() {
     };
   }, []);
 
+  async function loadMore() {
+    if (loadingMore || !hasMore || articles.length === 0) return;
+
+    setLoadingMore(true);
+    setLoadMoreError("");
+
+    try {
+      const lastArticle = articles[articles.length - 1];
+
+      const response = await fetch(
+        `/api/articles?after=${encodeURIComponent(lastArticle.id)}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data: Article[] = await response.json();
+
+      setArticles((prev) => [...prev, ...data]);
+      setHasMore(data.length === 3);
+    } catch (err) {
+      console.error(err);
+      setLoadMoreError("追加の記事を取得できませんでした");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
   const filteredArticles = articles.filter((article) =>
     article.title.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -90,6 +122,13 @@ function App() {
                 <li key={article.id}>{article.title}</li>
               ))}
             </ul>
+          )}
+          {loadMoreError && <p role="alert">{loadMoreError}</p>}
+
+          {hasMore && (
+            <button onClick={() => void loadMore()} disabled={loadingMore}>
+              {loadingMore ? "取得中..." : "さらに読み込む"}
+            </button>
           )}
         </>
       )}
