@@ -1,0 +1,11 @@
+warning: in the working copy of 'firestore-debug.log', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/firestore-debug.log b/firestore-debug.log[m
+[1mindex 1f28550..31e1535 100644[m
+[1m--- a/firestore-debug.log[m
+[1m+++ b/firestore-debug.log[m
+[36m@@ -58,3 +58,5 @@[m [mOct 12, 2026 3:30:55 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channe[m
+ INFO: Detected HTTP/2 connection.[m
+ Oct 12, 2026 3:31:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead[m
+ INFO: Detected non-HTTP/2 connection.[m
+[32m+[m[32mOct 12, 2026 3:31:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead[m
+[32m+[m[32mINFO: Detected non-HTTP/2 connection.[m

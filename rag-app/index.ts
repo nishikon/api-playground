@@ -1,16 +1,18 @@
-import { collection, getDocs, query, where, } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy, limit, } from "firebase/firestore";
 import { db } from "./firebase.js";
 
 async function getArticles() {
   try {
     const articlesRef = collection(db, "articles");
 
-const q = query(
-  articlesRef,
-  where("userId", "==", 1)
-);
+    const q = query(
+      collection(db, "articles"),
+      where("userId", "==", 1),
+      orderBy("id", "desc"),
+      limit(3)
+    );
 
-const snapshot = await getDocs(q);
+    const snapshot = await getDocs(q);
 
     console.log(`記事数: ${snapshot.size}件`);
 
