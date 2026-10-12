@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where, } from "firebase/firestore";
 import { db } from "./firebase";
 
 type Article = {
@@ -18,7 +18,12 @@ function App() {
 
     async function fetchArticles() {
       try {
-        const snapshot = await getDocs(collection(db, "articles"));
+        const articlesQuery = query(
+          collection(db, "articles"),
+          where("userId", "==", 1)
+        );
+        
+        const snapshot = await getDocs(articlesQuery);
 
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
