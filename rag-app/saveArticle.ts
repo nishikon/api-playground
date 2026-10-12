@@ -15,18 +15,25 @@ async function saveArticle() {
   );
 
   const posts: Post[] = JSON.parse(json);
-  const article = posts[0];
+  const articles = posts.slice(0, 10);
 
-  if (!article) {
-    throw new Error("記事がありません");
-  }
+if (articles.length === 0) {
+  throw new Error("記事がありません");
+}
 
-  await adminDb
+const batch = adminDb.batch();
+
+for (const article of articles) {
+  const docRef = adminDb
     .collection("articles")
-    .doc(String(article.id))
-    .set(article);
+    .doc(String(article.id));
 
-  console.log("保存成功:", article.title);
+  batch.set(docRef, article);
+}
+
+await batch.commit();
+
+console.log(`${articles.length}件の記事を保存しました`);
 }
 
 saveArticle().catch(console.error);
