@@ -23,6 +23,7 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    
 
     async function fetchMessage() {
       try {
@@ -51,11 +52,12 @@ function App() {
     if (keyword === "") return;
 
     let cancelled = false;
+    const controller = new AbortController();
 
     const timer = setTimeout(() => {
       async function runSearch() {
         try {
-          const data = await searchArticles(keyword);
+          const data = await searchArticles(keyword, controller.signal);
 
           if (!cancelled) {
             setSearchResults(data.articles);
@@ -63,6 +65,8 @@ function App() {
             setSearchedKeyword(keyword);
           }
         } catch (err) {
+          if (controller.signal.aborted) return;
+          
           console.error(err);
 
           if (!cancelled) {
@@ -80,6 +84,7 @@ function App() {
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      controller.abort();
     };
   }, [keyword]);
 

@@ -9,8 +9,11 @@ export type Article = {
     nextCursor: string | null;
   };
   
-  async function requestJson<T>(url: string): Promise<T> {
-    const response = await fetch(url);
+  async function requestJson<T>(
+    url: string,
+    signal?: AbortSignal
+  ): Promise<T> {
+    const response = await fetch(url, { signal });
   
     if (!response.ok) {
       const errorData: { error?: string } = await response
@@ -38,8 +41,11 @@ export type Article = {
     return requestJson<ArticlesResponse>(url);
   }
 
-  export async function searchArticles(keyword: string) {
+  export async function searchArticles(
+    keyword: string,
+    signal?: AbortSignal
+  ) {
     const url = `/api/articles/search?q=${encodeURIComponent(keyword)}`;
   
-    return requestJson<{ articles: Article[] }>(url);
+    return requestJson<{ articles: Article[] }>(url, signal);
   }
