@@ -18,16 +18,24 @@ const server = createServer(async (req, res) => {
     }
 
     if (url.pathname === "/api/articles" && req.method === "GET") {
-        const after = url.searchParams.get("after");
+        const afterValues = url.searchParams.getAll("after");
+        const after = afterValues[0] ?? null;
 
-        if (
-            after !== null &&
-            (!/^\d+$/.test(after) || !Number.isSafeInteger(Number(after)))
-        ) {
+        const invalidAfter =
+            afterValues.length > 1 ||
+            (after !== null &&
+                (!/^[1-9]\d*$/.test(after) ||
+                    !Number.isSafeInteger(Number(after))));
+
+        if (invalidAfter) {
             res.writeHead(400, {
                 "Content-Type": "application/json; charset=utf-8",
             });
-            res.end(JSON.stringify({ error: "afterには整数を指定してください" }));
+            res.end(
+                JSON.stringify({
+                    error: "afterには正の整数を1つだけ指定してください",
+                })
+            );
             return;
         }
 
