@@ -5,6 +5,12 @@ type Article = {
   title: string;
 };
 
+type ArticlesResponse = {
+  articles: Article[];
+  hasMore: boolean;
+  nextCursor: string | null;
+};
+
 function App() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +20,7 @@ function App() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState("");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,12 +39,14 @@ function App() {
         const helloData: { message: string } =
           await helloResponse.json();
 
-        const articlesData: Article[] =
+        const articlesData: ArticlesResponse =
           await articlesResponse.json();
 
         if (!cancelled) {
           setApiMessage(helloData.message);
-          setArticles(articlesData);
+          setArticles(articlesData.articles);
+          setHasMore(articlesData.hasMore);
+          setNextCursor(articlesData.nextCursor);
         }
       } catch (err) {
         console.error(err);
@@ -60,26 +69,25 @@ function App() {
   }, []);
 
   async function loadMore() {
-    if (loadingMore || !hasMore || articles.length === 0) return;
+    if (loadingMore || !hasMore || nextCursor === null) return;
 
     setLoadingMore(true);
     setLoadMoreError("");
 
     try {
-      const lastArticle = articles[articles.length - 1];
-
       const response = await fetch(
-        `/api/articles?after=${encodeURIComponent(lastArticle.id)}`
+        `/api/articles?after=${encodeURIComponent(nextCursor)}`
       );
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const data: Article[] = await response.json();
+      const data: ArticlesResponse = await response.json();
 
-      setArticles((prev) => [...prev, ...data]);
-      setHasMore(data.length === 3);
+      setArticles((prev) => [...prev, ...data.articles]);
+      setHasMore(data.hasMore);
+      setNextCursor(data.nextCursor);
     } catch (err) {
       console.error(err);
       setLoadMoreError("追加の記事を取得できませんでした");
