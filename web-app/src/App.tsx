@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where, } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy, limit, } from "firebase/firestore";
 import { db } from "./firebase";
 
 type Article = {
@@ -20,9 +20,11 @@ function App() {
       try {
         const articlesQuery = query(
           collection(db, "articles"),
-          where("userId", "==", 1)
+          where("userId", "==", 1),
+          orderBy("id", "desc"),
+          limit(3)
         );
-        
+
         const snapshot = await getDocs(articlesQuery);
 
         const data = snapshot.docs.map((doc) => ({
@@ -59,14 +61,14 @@ function App() {
   return (
     <main>
       <h1>リサーチアプリ</h1>
-  
+
       <input
         type="text"
         placeholder="記事タイトルを検索..."
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
       />
-  
+
       {loading ? (
         <p>読み込み中...</p>
       ) : error ? (
@@ -74,7 +76,7 @@ function App() {
       ) : (
         <>
           <p>検索結果：{filteredArticles.length}件</p>
-  
+
           {filteredArticles.length === 0 ? (
             <p>一致する記事がありません</p>
           ) : (
