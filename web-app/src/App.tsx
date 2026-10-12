@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
+import {
+  getArticles,
+  getHelloMessage,
+  type Article,
+} from "./api";
 
-type Article = {
-  id: string;
-  title: string;
-};
 
-type ArticlesResponse = {
-  articles: Article[];
-  hasMore: boolean;
-  nextCursor: string | null;
-};
 
 function App() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -27,21 +23,10 @@ function App() {
 
     async function fetchData() {
       try {
-        const [helloResponse, articlesResponse] = await Promise.all([
-          fetch("/api/hello"),
-          fetch("/api/articles"),
+        const [helloData, articlesData] = await Promise.all([
+          getHelloMessage(),
+          getArticles(),
         ]);
-
-        if (!helloResponse.ok || !articlesResponse.ok) {
-          throw new Error("API通信に失敗しました");
-        }
-
-        const helloData: { message: string } =
-          await helloResponse.json();
-
-        const articlesData: ArticlesResponse =
-          await articlesResponse.json();
-
         if (!cancelled) {
           setApiMessage(helloData.message);
           setArticles(articlesData.articles);
@@ -75,21 +60,7 @@ function App() {
     setLoadMoreError("");
 
     try {
-      const response = await fetch(
-        `/api/articles?after=${encodeURIComponent(nextCursor)}`
-      );
-
-      if (!response.ok) {
-        const errorData: { error?: string } = await response
-          .json()
-          .catch(() => ({}));
-
-        throw new Error(
-          errorData.error ?? `APIエラー（HTTP ${response.status}）`
-        );
-      }
-
-      const data: ArticlesResponse = await response.json();
+      const data = await getArticles(nextCursor);
 
       setArticles((prev) => [...prev, ...data.articles]);
       setHasMore(data.hasMore);
