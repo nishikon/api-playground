@@ -17,7 +17,6 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  if (req.url === "/api/articles" && req.method === "GET") {
     if (url.pathname === "/api/articles" && req.method === "GET") {
         const after = url.searchParams.get("after");
       
