@@ -16,7 +16,57 @@ const server = createServer(async (req, res) => {
         );
         return;
     }
+    if (url.pathname === "/api/articles/search" && req.method === "GET") {
+        const values = url.searchParams.getAll("q");
+        const keyword = values[0]?.trim() ?? "";
 
+        if (values.length !== 1 || keyword.length === 0 || keyword.length > 80) {
+            res.writeHead(400, {
+                "Content-Type": "application/json; charset=utf-8",
+            });
+            res.end(
+                JSON.stringify({
+                    error: "検索キーワードは1〜80文字で指定してください",
+                })
+            );
+            return;
+        }
+
+        try {
+            const snapshot = await adminDb
+                .collection("articles")
+                .where("userId", "==", 1)
+                .orderBy("id", "desc")
+                .limit(100)
+                .get();
+
+            const articles = snapshot.docs
+                .map((doc) => ({
+                    id: doc.id,
+                    title: String(doc.data().title ?? ""),
+                }))
+                .filter((article) =>
+                    article.title.toLowerCase().includes(keyword.toLowerCase())
+                )
+                .slice(0, 10);
+
+            res.writeHead(200, {
+                "Content-Type": "application/json; charset=utf-8",
+            });
+
+            res.end(JSON.stringify({ articles }));
+        } catch (error) {
+            console.error(error);
+
+            res.writeHead(500, {
+                "Content-Type": "application/json; charset=utf-8",
+            });
+
+            res.end(JSON.stringify({ error: "記事の検索に失敗しました" }));
+        }
+
+        return;
+    }
     if (url.pathname === "/api/articles" && req.method === "GET") {
         const afterValues = url.searchParams.getAll("after");
         const after = afterValues[0] ?? null;
