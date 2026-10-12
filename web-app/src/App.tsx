@@ -1,37 +1,69 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "./firebase";
 
 type Article = {
-  id: number;
+  id: string;
   title: string;
 };
 
 function App() {
-  const [articles, setArticles] = useState<Article[]>([
-    { id: 1, title: "AI市場の調査" },
-    { id: 2, title: "海外SaaSの競合分析" },
-  ]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  function addArticle() {
-    const newArticle: Article = {
-      id: articles.length + 1,
-      title: `新しい記事 ${articles.length + 1}`,
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchArticles() {
+      try {
+        const snapshot = await getDocs(collection(db, "articles"));
+
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          title: String(doc.data().title ?? ""),
+        }));
+
+        if (!cancelled) {
+          setArticles(data);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setError("記事の取得に失敗しました");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void fetchArticles();
+
+    return () => {
+      cancelled = true;
     };
-
-    setArticles([...articles, newArticle]);
-  }
+  }, []);
 
   return (
     <main>
       <h1>リサーチアプリ</h1>
-      <p>記事数：{articles.length}件</p>
 
-      <button onClick={addArticle}>記事を追加</button>
-
-      <ul>
-        {articles.map((article) => (
-          <li key={article.id}>{article.title}</li>
-        ))}
-      </ul>
+      {loading ? (
+        <p>読み込み中...</p>
+      ) : error ? (
+        <p role="alert">{error}</p>
+      ) : (
+        <>
+          <p>記事数：{articles.length}件</p>
+          <ul>
+            {articles.map((article) => (
+              <li key={article.id}>{article.title}</li>
+            ))}
+          </ul>
+        </>
+      )}
     </main>
   );
 }
