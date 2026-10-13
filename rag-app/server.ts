@@ -98,7 +98,24 @@ const server = createServer(async (req, res) => {
                 .orderBy("id", "desc");
 
             if (after !== null) {
-                articlesQuery = articlesQuery.startAfter(Number(after));
+                const cursorDoc = await adminDb
+                    .collection("articles")
+                    .doc(after)
+                    .get();
+
+                if (
+                    !cursorDoc.exists ||
+                    cursorDoc.get("userId") !== 1 ||
+                    cursorDoc.get("createdAt") === undefined
+                ) {
+                    res.writeHead(400, {
+                        "Content-Type": "application/json; charset=utf-8",
+                    });
+                    res.end(JSON.stringify({ error: "無効なカーソルです" }));
+                    return;
+                }
+
+                articlesQuery = articlesQuery.startAfter(cursorDoc);
             }
 
             const snapshot = await articlesQuery.limit(4).get();
@@ -139,34 +156,34 @@ const server = createServer(async (req, res) => {
         try {
             const chunks: Buffer[] = [];
             let size = 0;
-    
+
             for await (const chunk of req) {
                 const buffer = Buffer.from(chunk);
                 size += buffer.length;
-    
+
                 if (size > 4096) {
                     res.writeHead(413);
                     res.end("Request too large");
                     return;
                 }
-    
+
                 chunks.push(buffer);
             }
-    
+
             const body: unknown = JSON.parse(
                 Buffer.concat(chunks).toString("utf8")
             );
-    
+
             if (typeof body !== "object" || body === null || Array.isArray(body)) {
                 res.writeHead(400);
                 res.end("Invalid JSON data");
                 return;
             }
-    
+
             const data = body as Record<string, unknown>;
             const id = data.id;
             const title = data.title;
-    
+
             if (
                 typeof id !== "number" ||
                 !Number.isSafeInteger(id) ||
@@ -179,14 +196,14 @@ const server = createServer(async (req, res) => {
                 res.end("Invalid article");
                 return;
             }
-    
+
             await adminDb.collection("articles").doc(String(id)).create({
                 id,
                 userId: 1,
                 title: title.trim(),
                 createdAt: Timestamp.now(),
             });
-    
+
             res.writeHead(201, {
                 "Content-Type": "application/json; charset=utf-8",
             });
@@ -212,7 +229,7 @@ const server = createServer(async (req, res) => {
                 res.end("Failed to create article");
             }
         }
-    
+
         return;
     }
 
