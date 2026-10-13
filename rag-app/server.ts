@@ -133,6 +133,86 @@ const server = createServer(async (req, res) => {
         return;
     }
 
+    if (url.pathname === "/api/articles" && req.method === "POST") {
+        try {
+            const chunks: Buffer[] = [];
+            let size = 0;
+    
+            for await (const chunk of req) {
+                const buffer = Buffer.from(chunk);
+                size += buffer.length;
+    
+                if (size > 4096) {
+                    res.writeHead(413);
+                    res.end("Request too large");
+                    return;
+                }
+    
+                chunks.push(buffer);
+            }
+    
+            const body: unknown = JSON.parse(
+                Buffer.concat(chunks).toString("utf8")
+            );
+    
+            if (typeof body !== "object" || body === null || Array.isArray(body)) {
+                res.writeHead(400);
+                res.end("Invalid JSON data");
+                return;
+            }
+    
+            const data = body as Record<string, unknown>;
+            const id = data.id;
+            const title = data.title;
+    
+            if (
+                typeof id !== "number" ||
+                !Number.isSafeInteger(id) ||
+                id <= 0 ||
+                typeof title !== "string" ||
+                title.trim().length === 0 ||
+                title.trim().length > 100
+            ) {
+                res.writeHead(400);
+                res.end("Invalid article");
+                return;
+            }
+    
+            await adminDb.collection("articles").doc(String(id)).create({
+                id,
+                userId: 1,
+                title: title.trim(),
+            });
+    
+            res.writeHead(201, {
+                "Content-Type": "application/json; charset=utf-8",
+            });
+            res.end(JSON.stringify({
+                id: String(id),
+                title: title.trim(),
+            }));
+        } catch (error) {
+            if (error instanceof SyntaxError) {
+                res.writeHead(400);
+                res.end("Invalid JSON");
+            } else if (
+                typeof error === "object" &&
+                error !== null &&
+                "code" in error &&
+                error.code === 6
+            ) {
+                res.writeHead(409);
+                res.end("Article ID already exists");
+            } else {
+                console.error(error);
+                res.writeHead(500);
+                res.end("Failed to create article");
+            }
+        }
+    
+        return;
+    }
+
     res.writeHead(404);
     res.end("Not Found");
 });
