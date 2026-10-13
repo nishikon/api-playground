@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { adminDb } from "./admin.js";
 import { Timestamp } from "firebase-admin/firestore";
+import { chunkText } from "./chunkText.js";
 
 
 const server = createServer(async (req, res) => {
@@ -197,12 +198,29 @@ const server = createServer(async (req, res) => {
 
             const docRef = adminDb.collection("articles").doc();
 
-            await docRef.create({
+            const textChunks = chunkText(bodyText.trim(), 200, 40);
+
+            const batch = adminDb.batch();
+
+            batch.create(docRef, {
                 userId: 1,
                 title: title.trim(),
                 body: bodyText.trim(),
                 createdAt: Timestamp.now(),
             });
+
+            chunks.forEach((content, index) => {
+                const chunkRef = docRef
+                    .collection("chunks")
+                    .doc(String(index));
+
+                batch.set(chunkRef, {
+                    content,
+                    index,
+                });
+            });
+
+            await batch.commit();
 
             res.writeHead(201, {
                 "Content-Type": "application/json; charset=utf-8",
