@@ -209,7 +209,7 @@ const server = createServer(async (req, res) => {
                 createdAt: Timestamp.now(),
             });
 
-            chunks.forEach((content, index) => {
+            textChunks.forEach((content, index) => {
                 const chunkRef = docRef
                     .collection("chunks")
                     .doc(String(index));
