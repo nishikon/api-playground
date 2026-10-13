@@ -19,6 +19,74 @@ const server = createServer(async (req, res) => {
         );
         return;
     }
+    if (url.pathname === "/api/chunks/search" && req.method === "GET") {
+        const values = url.searchParams.getAll("q");
+        const keyword = values[0]?.trim() ?? "";
+      
+        if (values.length !== 1 || keyword.length === 0 || keyword.length > 80) {
+          res.writeHead(400, {
+            "Content-Type": "application/json; charset=utf-8",
+          });
+          res.end(JSON.stringify({ error: "検索キーワードは1〜80文字で指定してください" }));
+          return;
+        }
+      
+        try {
+          const articles = await adminDb
+            .collection("articles")
+            .where("userId", "==", 1)
+            .orderBy("createdAt", "desc")
+            .limit(10)
+            .get();
+      
+          const results: {
+            articleId: string;
+            title: string;
+            content: string;
+            index: number;
+          }[] = [];
+      
+          for (const article of articles.docs) {
+            const chunks = await article.ref.collection("chunks").get();
+      
+            for (const chunk of chunks.docs) {
+              const content = chunk.get("content");
+              const index = chunk.get("index");
+      
+              if (
+                typeof content === "string" &&
+                content.toLowerCase().includes(keyword.toLowerCase())
+              ) {
+                results.push({
+                  articleId: article.id,
+                  title: String(article.get("title") ?? ""),
+                  content,
+                  index: typeof index === "number" ? index : 0,
+                });
+              }
+      
+              if (results.length >= 10) break;
+            }
+      
+            if (results.length >= 10) break;
+          }
+      
+          res.writeHead(200, {
+            "Content-Type": "application/json; charset=utf-8",
+          });
+          res.end(JSON.stringify({ results }));
+        } catch (error) {
+          console.error(error);
+          res.writeHead(500, {
+            "Content-Type": "application/json; charset=utf-8",
+          });
+          res.end(JSON.stringify({ error: "チャンク検索に失敗しました" }));
+        }
+      
+        return;
+      }
+
+
     if (url.pathname === "/api/articles/search" && req.method === "GET") {
         const values = url.searchParams.getAll("q");
         const keyword = values[0]?.trim() ?? "";
