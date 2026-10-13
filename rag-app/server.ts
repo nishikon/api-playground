@@ -38,7 +38,7 @@ const server = createServer(async (req, res) => {
             const snapshot = await adminDb
                 .collection("articles")
                 .where("userId", "==", 1)
-                .orderBy("createAt", "desc")
+                .orderBy("createdAt", "desc")
                 .limit(100)
                 .get();
 
