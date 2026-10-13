@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getHelloMessage } from "./api";
 import { useArticleSearch } from "./useArticleSearch";
 import { useArticles } from "./useArticles";
+import { SearchInput } from "./SearchInput";
 
 function App() {
   const {
@@ -16,7 +17,7 @@ function App() {
 
   const [searchText, setSearchText] = useState("");
   const [apiMessage, setApiMessage] = useState("読み込み中...");
-  
+
   const {
     keyword,
     searchResults,
@@ -26,7 +27,7 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
-    
+
 
     async function fetchMessage() {
       try {
@@ -51,7 +52,7 @@ function App() {
     };
   }, []);
 
-  
+
 
   return (
     <main>
@@ -60,11 +61,9 @@ function App() {
       <h2>自作APIからのメッセージ</h2>
       <p>{apiMessage}</p>
 
-      <input
-        type="text"
-        placeholder="記事タイトルを検索..."
+      <SearchInput
         value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
+        onChange={setSearchText}
       />
 
       {keyword !== "" ? (
