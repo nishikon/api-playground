@@ -1,7 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { createArticle } from "./api";
 
-export function ArticleForm() {
+type ArticleFormProps = {
+  onCreated: () => Promise<void>;
+};
+
+export function ArticleForm({ onCreated }: ArticleFormProps) {
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
@@ -31,9 +35,15 @@ export function ArticleForm() {
     try {
       await createArticle(articleId, title.trim());
 
-      setMessage("記事を登録しました！");
       setId("");
       setTitle("");
+
+      try {
+        await onCreated();
+        setMessage("記事を登録し、一覧を更新しました！");
+      } catch {
+        setMessage("記事は登録されましたが、一覧の更新に失敗しました");
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "登録に失敗しました"

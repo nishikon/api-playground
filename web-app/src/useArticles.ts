@@ -41,6 +41,26 @@ export function useArticles() {
     };
   }, []);
 
+  async function refreshArticles() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await getArticles();
+
+      setArticles(data.articles);
+      setHasMore(data.hasMore);
+      setNextCursor(data.nextCursor);
+      setLoadMoreError("");
+    } catch (err) {
+      console.error(err);
+      setError("記事一覧の再取得に失敗しました");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function loadMore() {
     if (loadingMore || !hasMore || nextCursor === null) return;
 
@@ -76,5 +96,6 @@ export function useArticles() {
     loadingMore,
     loadMoreError,
     loadMore,
+    refreshArticles,
   };
 }

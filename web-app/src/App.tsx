@@ -54,12 +54,15 @@ function App() {
     };
   }, []);
 
-
+  async function handleArticleCreated() {
+    setSearchText("");
+    await refreshArticles();
+  }
 
   return (
     <main>
       <h1>リサーチアプリ</h1>
-      <ArticleForm />
+      <ArticleForm onCreated={handleArticleCreated} />
 
       <h2>自作APIからのメッセージ</h2>
       <p>{apiMessage}</p>
