@@ -3,6 +3,7 @@ import { getHelloMessage } from "./api";
 import { useArticleSearch } from "./useArticleSearch";
 import { useArticles } from "./useArticles";
 import { SearchInput } from "./SearchInput";
+import { ArticleList } from "./ArticleList";
 
 function App() {
   const {
@@ -78,11 +79,7 @@ function App() {
             {searchResults.length === 0 ? (
               <p>一致する記事がありません</p>
             ) : (
-              <ul>
-                {searchResults.map((article) => (
-                  <li key={article.id}>{article.title}</li>
-                ))}
-              </ul>
+              <ArticleList articles={searchResults} />
             )}
           </>
         )
@@ -94,11 +91,7 @@ function App() {
         <>
           <p>表示中の記事：{articles.length}件</p>
 
-          <ul>
-            {articles.map((article) => (
-              <li key={article.id}>{article.title}</li>
-            ))}
-          </ul>
+          <ArticleList articles={articles} />
 
           {loadMoreError && <p role="alert">{loadMoreError}</p>}
 
