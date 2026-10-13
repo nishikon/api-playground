@@ -95,7 +95,7 @@ const server = createServer(async (req, res) => {
             let articlesQuery = adminDb
                 .collection("articles")
                 .where("userId", "==", 1)
-                .orderBy("id", "desc");
+                .orderBy("createdAt", "desc");
 
             if (after !== null) {
                 const cursorDoc = await adminDb
