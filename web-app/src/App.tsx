@@ -15,6 +15,7 @@ function App() {
     loadingMore,
     loadMoreError,
     loadMore,
+    refreshArticles,
   } = useArticles();
 
   const [searchText, setSearchText] = useState("");
