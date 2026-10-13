@@ -79,3 +79,16 @@ export async function createArticle(title: string, body: string) {
 
   return response.json() as Promise<Article>;
 }
+
+export type ChunkResult = {
+  articleId: string;
+  title: string;
+  content: string;
+  index: number;
+};
+
+export async function searchStoredChunks(keyword: string) {
+  const url = `/api/chunks/search?q=${encodeURIComponent(keyword)}`;
+
+  return requestJson<{ results: ChunkResult[] }>(url);
+}

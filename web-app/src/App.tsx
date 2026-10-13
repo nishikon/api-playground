@@ -5,6 +5,7 @@ import { useArticles } from "./useArticles";
 import { SearchInput } from "./SearchInput";
 import { ArticleList } from "./ArticleList";
 import { ArticleForm } from "./ArticleForm";
+import { ChunkSearch } from "./ChunkSearch";
 
 function App() {
   const {
@@ -64,6 +65,8 @@ function App() {
     <main>
       <h1>リサーチアプリ</h1>
       <ArticleForm onCreated={handleArticleCreated} />
+
+      <ChunkSearch />
 
       <h2>自作APIからのメッセージ</h2>
       <p>{apiMessage}</p>
