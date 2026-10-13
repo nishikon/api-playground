@@ -1,5 +1,7 @@
 import { createServer } from "node:http";
 import { adminDb } from "./admin.js";
+import { Timestamp } from "firebase-admin/firestore";
+
 
 const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://127.0.0.1:3001");
@@ -182,6 +184,7 @@ const server = createServer(async (req, res) => {
                 id,
                 userId: 1,
                 title: title.trim(),
+                createdAt: Timestamp.now(),
             });
     
             res.writeHead(201, {
