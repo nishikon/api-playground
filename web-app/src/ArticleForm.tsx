@@ -10,7 +10,6 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
