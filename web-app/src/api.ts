@@ -51,21 +51,31 @@ export type Article = {
   }
 
   export async function createArticle(id: number, title: string) {
-    const response = await fetch("/api/articles", {
+    let response: Response;
+
+  try {
+    response = await fetch("/api/articles", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ id, title }),
     });
-  
-    if (!response.ok) {
-      if (response.status === 409) {
-        throw new Error("その記事IDはすでに使われています");
-      }
-  
-      throw new Error(`登録に失敗しました（HTTP ${response.status}）`);
-    }
-  
-    return response.json() as Promise<Article>;
+  } catch {
+    throw new Error("サーバーに接続できませんでした");
+  }
+
+  if (response.status === 400) {
+    throw new Error("記事IDまたはタイトルを確認してください");
+  }
+
+  if (response.status === 409) {
+    throw new Error("その記事IDはすでに使われています");
+  }
+
+  if (!response.ok) {
+    throw new Error("サーバーでエラーが発生しました");
+  }
+
+  return response.json() as Promise<Article>;
   }
