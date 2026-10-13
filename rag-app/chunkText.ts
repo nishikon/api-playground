@@ -1,4 +1,4 @@
-function chunkText(
+export function chunkText(
     text: string,
     chunkSize: number,
     overlap: number
@@ -26,8 +26,4 @@ function chunkText(
     return chunks;
   }
   
-  const text = "ABCDEFGHIJKL";
-  
-  const result = chunkText(text, 4, 2);
-  
-  console.log(result);
+ 
