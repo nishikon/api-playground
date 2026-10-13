@@ -38,7 +38,7 @@ const server = createServer(async (req, res) => {
             const snapshot = await adminDb
                 .collection("articles")
                 .where("userId", "==", 1)
-                .orderBy("id", "desc")
+                .orderBy("createAt", "desc")
                 .limit(100)
                 .get();
 
@@ -75,9 +75,7 @@ const server = createServer(async (req, res) => {
 
         const invalidAfter =
             afterValues.length > 1 ||
-            (after !== null &&
-                (!/^[1-9]\d*$/.test(after) ||
-                    !Number.isSafeInteger(Number(after))));
+            (after !== null && !/^[A-Za-z0-9]{1,100}$/.test(after));
 
         if (invalidAfter) {
             res.writeHead(400, {
@@ -181,13 +179,9 @@ const server = createServer(async (req, res) => {
             }
 
             const data = body as Record<string, unknown>;
-            const id = data.id;
             const title = data.title;
 
             if (
-                typeof id !== "number" ||
-                !Number.isSafeInteger(id) ||
-                id <= 0 ||
                 typeof title !== "string" ||
                 title.trim().length === 0 ||
                 title.trim().length > 100
@@ -197,8 +191,9 @@ const server = createServer(async (req, res) => {
                 return;
             }
 
-            await adminDb.collection("articles").doc(String(id)).create({
-                id,
+            const docRef = adminDb.collection("articles").doc();
+
+            await docRef.create({
                 userId: 1,
                 title: title.trim(),
                 createdAt: Timestamp.now(),
@@ -207,8 +202,9 @@ const server = createServer(async (req, res) => {
             res.writeHead(201, {
                 "Content-Type": "application/json; charset=utf-8",
             });
+
             res.end(JSON.stringify({
-                id: String(id),
+                id: docRef.id,
                 title: title.trim(),
             }));
         } catch (error) {

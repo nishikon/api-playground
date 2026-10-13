@@ -1,57 +1,57 @@
 export type Article = {
-    id: string;
-    title: string;
-  };
-  
-  export type ArticlesResponse = {
-    articles: Article[];
-    hasMore: boolean;
-    nextCursor: string | null;
-  };
-  
-  async function requestJson<T>(
-    url: string,
-    signal?: AbortSignal
-  ): Promise<T> {
-    const response = await fetch(url, { signal });
-  
-    if (!response.ok) {
-      const errorData: { error?: string } = await response
-        .json()
-        .catch(() => ({}));
-  
-      throw new Error(
-        errorData.error ?? `APIエラー（HTTP ${response.status}）`
-      );
-    }
-  
-    return response.json() as Promise<T>;
-  }
-  
-  export async function getHelloMessage() {
-    return requestJson<{ message: string }>("/api/hello");
-  }
-  
-  export async function getArticles(after?: string) {
-    const url =
-      after === undefined
-        ? "/api/articles"
-        : `/api/articles?after=${encodeURIComponent(after)}`;
-  
-    return requestJson<ArticlesResponse>(url);
+  id: string;
+  title: string;
+};
+
+export type ArticlesResponse = {
+  articles: Article[];
+  hasMore: boolean;
+  nextCursor: string | null;
+};
+
+async function requestJson<T>(
+  url: string,
+  signal?: AbortSignal
+): Promise<T> {
+  const response = await fetch(url, { signal });
+
+  if (!response.ok) {
+    const errorData: { error?: string } = await response
+      .json()
+      .catch(() => ({}));
+
+    throw new Error(
+      errorData.error ?? `APIエラー（HTTP ${response.status}）`
+    );
   }
 
-  export async function searchArticles(
-    keyword: string,
-    signal?: AbortSignal
-  ) {
-    const url = `/api/articles/search?q=${encodeURIComponent(keyword)}`;
-  
-    return requestJson<{ articles: Article[] }>(url, signal);
-  }
+  return response.json() as Promise<T>;
+}
 
-  export async function createArticle(id: number, title: string) {
-    let response: Response;
+export async function getHelloMessage() {
+  return requestJson<{ message: string }>("/api/hello");
+}
+
+export async function getArticles(after?: string) {
+  const url =
+    after === undefined
+      ? "/api/articles"
+      : `/api/articles?after=${encodeURIComponent(after)}`;
+
+  return requestJson<ArticlesResponse>(url);
+}
+
+export async function searchArticles(
+  keyword: string,
+  signal?: AbortSignal
+) {
+  const url = `/api/articles/search?q=${encodeURIComponent(keyword)}`;
+
+  return requestJson<{ articles: Article[] }>(url, signal);
+}
+
+export async function createArticle(title: string) {
+  let response: Response;
 
   try {
     response = await fetch("/api/articles", {
@@ -59,7 +59,7 @@ export type Article = {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id, title }),
+      body: JSON.stringify({ title }),
     });
   } catch {
     throw new Error("サーバーに接続できませんでした");
@@ -78,4 +78,4 @@ export type Article = {
   }
 
   return response.json() as Promise<Article>;
-  }
+}

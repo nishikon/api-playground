@@ -6,7 +6,6 @@ type ArticleFormProps = {
 };
 
 export function ArticleForm({ onCreated }: ArticleFormProps) {
-  const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -15,11 +14,7 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const articleId = Number(id);
-
     if (
-      !Number.isSafeInteger(articleId) ||
-      articleId <= 0 ||
       title.trim().length === 0 ||
       title.trim().length > 100
     ) {
@@ -33,9 +28,8 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
     setMessage("");
 
     try {
-      await createArticle(articleId, title.trim());
+      await createArticle(title.trim());
 
-      setId("");
       setTitle("");
 
       try {
@@ -56,19 +50,6 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
   return (
     <form onSubmit={(e) => void handleSubmit(e)}>
       <h2>記事を登録する</h2>
-
-      <div>
-        <label htmlFor="article-id">記事ID</label>
-        <input
-          id="article-id"
-          type="number"
-          min="1"
-          step="1"
-          required
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-        />
-      </div>
 
       <div>
         <label htmlFor="article-title">記事タイトル</label>
