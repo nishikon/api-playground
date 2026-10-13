@@ -10,15 +10,19 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (
       title.trim().length === 0 ||
-      title.trim().length > 100
+      title.trim().length > 100 ||
+      body.trim().length === 0 ||
+      body.length > 2000
     ) {
-      setError("正しいIDと1〜100文字のタイトルを入力してください");
+      setError("タイトルは1〜100文字、本文は1〜2000文字で入力してください");
       setMessage("");
       return;
     }
@@ -28,9 +32,10 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
     setMessage("");
 
     try {
-      await createArticle(title.trim());
+      await createArticle(title.trim(), body.trim());
 
       setTitle("");
+      setBody("");
 
       try {
         await onCreated();
@@ -51,6 +56,7 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
     <form onSubmit={(e) => void handleSubmit(e)}>
       <h2>記事を登録する</h2>
 
+
       <div>
         <label htmlFor="article-title">記事タイトル</label>
         <input
@@ -60,6 +66,16 @@ export function ArticleForm({ onCreated }: ArticleFormProps) {
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="article-body">記事本文</label>
+        <textarea
+          id="article-body"
+          maxLength={2000}
+          required
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
         />
       </div>
 

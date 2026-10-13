@@ -180,11 +180,15 @@ const server = createServer(async (req, res) => {
 
             const data = body as Record<string, unknown>;
             const title = data.title;
+            const bodyText = data.body;
 
             if (
                 typeof title !== "string" ||
                 title.trim().length === 0 ||
-                title.trim().length > 100
+                title.trim().length > 100 ||
+                typeof bodyText !== "string" ||
+                bodyText.trim().length === 0 ||
+                bodyText.length > 2000
             ) {
                 res.writeHead(400);
                 res.end("Invalid article");
@@ -196,6 +200,7 @@ const server = createServer(async (req, res) => {
             await docRef.create({
                 userId: 1,
                 title: title.trim(),
+                body: bodyText.trim(),
                 createdAt: Timestamp.now(),
             });
 

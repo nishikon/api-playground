@@ -50,7 +50,7 @@ export async function searchArticles(
   return requestJson<{ articles: Article[] }>(url, signal);
 }
 
-export async function createArticle(title: string) {
+export async function createArticle(title: string, body: string) {
   let response: Response;
 
   try {
@@ -59,7 +59,7 @@ export async function createArticle(title: string) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, body }),
     });
   } catch {
     throw new Error("サーバーに接続できませんでした");
