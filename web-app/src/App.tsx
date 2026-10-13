@@ -4,6 +4,7 @@ import { useArticleSearch } from "./useArticleSearch";
 import { useArticles } from "./useArticles";
 import { SearchInput } from "./SearchInput";
 import { ArticleList } from "./ArticleList";
+import { ArticleForm } from "./ArticleForm";
 
 function App() {
   const {
@@ -58,6 +59,7 @@ function App() {
   return (
     <main>
       <h1>リサーチアプリ</h1>
+      <ArticleForm />
 
       <h2>自作APIからのメッセージ</h2>
       <p>{apiMessage}</p>

@@ -49,3 +49,23 @@ export type Article = {
   
     return requestJson<{ articles: Article[] }>(url, signal);
   }
+
+  export async function createArticle(id: number, title: string) {
+    const response = await fetch("/api/articles", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id, title }),
+    });
+  
+    if (!response.ok) {
+      if (response.status === 409) {
+        throw new Error("その記事IDはすでに使われています");
+      }
+  
+      throw new Error(`登録に失敗しました（HTTP ${response.status}）`);
+    }
+  
+    return response.json() as Promise<Article>;
+  }
